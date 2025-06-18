@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using System.Data;
 using System.Drawing.Drawing2D;
 using System.Drawing.Printing;
 
@@ -61,6 +62,7 @@ namespace ClubDeportivoLogin
             dateBaja.ValueChanged += dateBaja_ValueChanged;
         }
 
+
         private bool VerificarExistenciaDNI(MySqlConnection conn, int dni)
         {
             using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM Cliente WHERE dni=@dni", conn))
@@ -79,6 +81,34 @@ namespace ClubDeportivoLogin
             }
         }
 
+        private void FormRegistrarCliente_Load(object sender, EventArgs e)
+        {
+            FormatearCampos();
+            tabControl1.SelectedTab = tabPage1;
+            CargarPagos();
+
+            bool clienteExiste = CargarDatosCliente();
+            bool socioActivo = clienteExiste && EsSocioActivo();
+
+            if (socioActivo)
+            {
+                dateBaja.Visible = true;
+                lblFeBaja.Visible = true;
+                chkAsociarse.Visible = false;
+                lblTipoCliente.Text = "MODIFICAR - SOCIO";
+                lblTipoCliente.ForeColor = Color.Blue;
+                CargarDatosSocio();
+                tabPage2.Parent = tabControl1;
+            }
+            else
+            {
+                chkAsociarse.Visible = true;
+                chkAsociarse.Checked = false;
+                lblTipoCliente.Text = clienteExiste ? "MODIFICAR - NO SOCIO" : "REGISTRAR - NO SOCIO";
+                lblTipoCliente.ForeColor = Color.Red;
+                tabPage2.Parent = null;
+            }
+        }
         private void ComboMedPago_SelectedIndexChanged(object sender, EventArgs e)
         {
             txtCuotas.Visible = comboMedPago.SelectedItem.ToString() == "Credito";
@@ -166,34 +196,6 @@ namespace ClubDeportivoLogin
             dateBaja.Visible = false;
             lblFeBaja.Visible = false;
             dateBaja.Checked = false;
-        }
-
-        private void FormRegistrarCliente_Load(object sender, EventArgs e)
-        {
-            FormatearCampos();
-            tabControl1.SelectedTab = tabPage1;
-
-            bool clienteExiste = CargarDatosCliente();
-            bool socioActivo = clienteExiste && EsSocioActivo();
-
-            if (socioActivo)
-            {
-                dateBaja.Visible = true;
-                lblFeBaja.Visible = true;
-                chkAsociarse.Visible = false;
-                lblTipoCliente.Text = "MODIFICAR - SOCIO";
-                lblTipoCliente.ForeColor = Color.Blue;
-                CargarDatosSocio();
-                tabPage2.Parent = tabControl1;
-            }
-            else
-            {
-                chkAsociarse.Visible = true;
-                chkAsociarse.Checked = false;
-                lblTipoCliente.Text = clienteExiste ? "MODIFICAR - NO SOCIO" : "REGISTRAR - NO SOCIO";
-                lblTipoCliente.ForeColor = Color.Red;
-                tabPage2.Parent = null;
-            }
         }
 
         private decimal CalcularTotalConDescuento(decimal monto)
@@ -288,7 +290,7 @@ namespace ClubDeportivoLogin
         {
             using (var conn = conexion.Conectar())
             {
-                int idCliente = GetClienteId(conn);
+                int idCliente = ObtenerIDCliente(conn);
 
                 // Variables para almacenar los datos leídos
                 DateTime? fechaInscripcion = null, fechaVencimiento = null, fechaBaja = null;
@@ -326,7 +328,7 @@ namespace ClubDeportivoLogin
                     }
                 }
 
-                // Ahora que el reader está cerrado, puedes ejecutar otros comandos
+                // Ahora que el reader está cerrado, ejecutamos:
                 if (fechaInscripcion.HasValue)
                     dtpInscripcion.Value = fechaInscripcion.Value;
                 if (fechaVencimiento.HasValue)
@@ -445,12 +447,13 @@ namespace ClubDeportivoLogin
 
         private void ConvertirASocio(MySqlConnection conn, int id)
         {
-            // Eliminar de NoSocio si existe
-            var eliminarNoSocio = new MySqlCommand("DELETE FROM NoSocio WHERE id = @id", conn);
-            eliminarNoSocio.Parameters.AddWithValue("@id", id);
-            eliminarNoSocio.ExecuteNonQuery();
+            // Actualizar NoSocio: poner fecha de baja en lugar de eliminar
+            var actualizarNoSocio = new MySqlCommand("UPDATE NoSocio SET fechaBaja = @fechaBaja WHERE id = @id",conn);
+            actualizarNoSocio.Parameters.AddWithValue("@fechaBaja", DateTime.Today);
+            actualizarNoSocio.Parameters.AddWithValue("@id", id);
+            actualizarNoSocio.ExecuteNonQuery();
 
-            // Verificar si ya es socio
+            // Resto del código original...
             var comandoVerificar = new MySqlCommand("SELECT COUNT(*) FROM Socio WHERE id = @id", conn);
             comandoVerificar.Parameters.AddWithValue("@id", id);
             bool existeSocio = Convert.ToInt32(comandoVerificar.ExecuteScalar()) > 0;
@@ -458,11 +461,11 @@ namespace ClubDeportivoLogin
             if (existeSocio)
             {
                 // Reactivar socio existente
-                var reactivar = new MySqlCommand(
-                    "UPDATE Socio SET fechaBaja = NULL WHERE id = @id",
-                    conn);
+                var reactivar = new MySqlCommand("UPDATE Socio SET fechaBaja = NULL WHERE id = @id",conn);
                 reactivar.Parameters.AddWithValue("@id", id);
                 reactivar.ExecuteNonQuery();
+
+                InsertarCuotaInicial(conn, id);
             }
             else
             {
@@ -477,13 +480,18 @@ namespace ClubDeportivoLogin
 
                 nuevoSocio.Parameters.AddWithValue("@id", id);
                 nuevoSocio.Parameters.AddWithValue("@fechaInsc", DateTime.Today);
-                nuevoSocio.Parameters.AddWithValue("@fechaVenc", DateTime.Today.AddMonths(1));
+                nuevoSocio.Parameters.AddWithValue("@fechaVenc", DateTime.Today);
                 nuevoSocio.Parameters.AddWithValue("@numCarnet", lblNumCarnet.Text);
                 nuevoSocio.Parameters.AddWithValue("@carnetEntregado", chkCarnetEntregado.Checked);
                 nuevoSocio.ExecuteNonQuery();
 
                 InsertarCuotaInicial(conn, id);
             }
+
+            // Actualizar estado en Cliente
+            var actualizarCliente = new MySqlCommand("UPDATE Cliente SET asociarse = true WHERE id = @id",conn);
+            actualizarCliente.Parameters.AddWithValue("@id", id);
+            actualizarCliente.ExecuteNonQuery();
         }
 
         private void InsertarCuotaInicial(MySqlConnection conn, int idSocio)
@@ -515,19 +523,111 @@ namespace ClubDeportivoLogin
 
             decimal montoTotal = CalcularTotalConDescuento(monto);
 
-            // Cuota actual (pagada)
-            InsertarCuota(conn, idSocio, DateTime.Today, monto,
-                         medioPago, cuotas, DateTime.Today.AddMonths(1),
-                         descuento, montoTotal);
+            // Insertar cuota pagada
+            var cmd = new MySqlCommand(
+                @"INSERT INTO Cuota 
+                (idSocio, fechaPago, monto, medioPago, cantidadCuotas, fechaVencimiento, descuento, montoTotal, comprobante) 
+                VALUES(@id, @fp, @m, @mp, @cq, @fv, @descuento, @montoTotal, @comprobante)", conn);
 
-            // Próxima cuota (adeudada) - sin descuento
-            // Solo si no es pago único
-            if (medioPago != "Efectivo" || cuotas > 1)
+            cmd.Parameters.AddWithValue("@id", idSocio);
+            cmd.Parameters.AddWithValue("@fp", DateTime.Today);
+            cmd.Parameters.AddWithValue("@m", monto);
+            cmd.Parameters.AddWithValue("@mp", medioPago);
+            cmd.Parameters.AddWithValue("@cq", cuotas);
+            cmd.Parameters.AddWithValue("@fv", DateTime.Today);
+            cmd.Parameters.AddWithValue("@descuento", descuento);
+            cmd.Parameters.AddWithValue("@montoTotal", montoTotal);
+            cmd.Parameters.AddWithValue("@comprobante", DBNull.Value);
+            cmd.ExecuteNonQuery();
+
+            // Obtener el id de la cuota recién insertada
+            cmd.CommandText = "SELECT LAST_INSERT_ID()";
+            int idCuota = Convert.ToInt32(cmd.ExecuteScalar());
+
+            // Generar y actualizar el número de comprobante
+            string comprobante = $"100{idCuota}";
+            var cmdUpdate = new MySqlCommand("UPDATE Cuota SET comprobante=@comprobante WHERE id=@id", conn);
+            cmdUpdate.Parameters.AddWithValue("@comprobante", comprobante);
+            cmdUpdate.Parameters.AddWithValue("@id", idCuota);
+            cmdUpdate.ExecuteNonQuery();
+
+            // Guardar el id para impresión
+            int ultimoIdPago = idCuota;
+
+            // Abrir vista previa de impresión del comprobante de la primera cuota
+            PrintDocument printDoc = new PrintDocument();
+            printDoc.DefaultPageSettings.PaperSize = new PaperSize("Recibo", 280, 350);
+            printDoc.PrintPage += (s, e) => ImprimirComprobanteSocio(e, idCuota, comprobante, monto, descuento, montoTotal, medioPago);
+
+            PrintPreviewDialog preview = new PrintPreviewDialog
             {
-                InsertarCuota(conn, idSocio, null, monto,
-                             null, 0, DateTime.Today.AddMonths(2),
-                             0, monto);
-            }
+                Document = printDoc,
+                WindowState = FormWindowState.Maximized,
+                PrintPreviewControl = { Zoom = 1.0 }
+            };
+            preview.ShowDialog();
+
+            // Insertar próxima cuota pendiente
+            InsertarCuota(conn, idSocio, null, monto, null, 0, DateTime.Today.AddDays(30), 0, monto);
+        }
+
+        // Método para imprimir el comprobante (puedes adaptarlo según tu diseño)
+        private void ImprimirComprobanteSocio(PrintPageEventArgs e, int idCuota, string comprobante, decimal monto, decimal descuento, decimal montoTotal, string medioPago)
+        {
+            int y = 10;
+            int left = 10;
+            Font fontTitle = new Font("Consolas", 12, FontStyle.Bold);
+            Font fontBody = new Font("Consolas", 10, FontStyle.Regular);
+            Font fontBody2 = new Font("Consolas", 8, FontStyle.Regular);
+            Font fontBold = new Font("Consolas", 10, FontStyle.Bold);
+            Font fontBold2 = new Font("Consolas", 12, FontStyle.Bold);
+
+            // Logo
+            Image logo = Properties.Resources.ClubIcon;
+            e.Graphics.DrawImage(logo, 210, y, 60, 60);
+
+            // Datos del club
+            e.Graphics.DrawString("CLUB DEPORTIVO", fontBold2, Brushes.Black, left, y);
+            y += 22;
+            e.Graphics.DrawString("Av. San Martin 1234 - Ciudad", fontBody2, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString("CUIT: 30-12345678-9", fontBody2, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString("Tel: (011) 1234-5678", fontBody2, Brushes.Black, left, y);
+            y += 18;
+
+            // Línea separadora
+            e.Graphics.DrawString("----------------------------------------", fontBody, Brushes.Black, 0, y);
+            y += 18;
+
+            // Datos del comprobante
+            e.Graphics.DrawString("RECIBO DE PAGO", fontBold, Brushes.Black, left, y);
+            y += 20;
+            e.Graphics.DrawString($"Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}", fontBody, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString($"Comprobante N°: {comprobante}", fontBody, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString($"Socio: {txtNombre.Text} {txtApellido.Text}", fontBody, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString($"DNI: {dniCliente}", fontBody, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString($"Concepto:...........[Acceso Total]", fontBody, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString($"Monto original:.... $ {monto:0.00}", fontBody, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString($"Descuento: {descuento}% ", fontBody, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString("----------------------------------------", fontBody, Brushes.Black, 0, y);
+            y += 18;
+            e.Graphics.DrawString($"TOTAL A ABONAR: $ {montoTotal:0.00}", fontBold2, Brushes.Black, left, y);
+            y += 25;
+            e.Graphics.DrawString($"Medio de pago: {medioPago}", fontBody, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString($"Estado: PAGADO", fontBold, Brushes.Black, left, y);
+            y += 18;
+            e.Graphics.DrawString("----------------------------------------", fontBody, Brushes.Black, 0, y);
+            y += 18;
+            e.Graphics.DrawString("¡Gracias por su pago!", fontBold2, Brushes.Black, left + 30, y);
         }
 
         private void BloquearCamposPago()
@@ -542,25 +642,18 @@ namespace ClubDeportivoLogin
         {
             using (var conn = conexion.Conectar())
             {
-                int idCliente = GetClienteId(conn);
+                int idCliente = ObtenerIDCliente(conn);
 
-                // Verificar si es socio (tiene registro en tabla Socio)
-                var cmdSocio = new MySqlCommand("SELECT COUNT(*) FROM Socio WHERE id=@id", conn);
+                // Verificar si es socio activo (sin fecha de baja)
+                var cmdSocio = new MySqlCommand(
+                    "SELECT COUNT(*) FROM Socio WHERE id=@id AND fechaBaja IS NULL",
+                    conn);
                 cmdSocio.Parameters.AddWithValue("@id", idCliente);
-                bool esSocio = Convert.ToInt32(cmdSocio.ExecuteScalar()) > 0;
-
-                if (!esSocio) return false;
-
-                // Verificar si no tiene fecha de baja
-                var cmdBaja = new MySqlCommand("SELECT fechaBaja FROM Socio WHERE id=@id", conn);
-                cmdBaja.Parameters.AddWithValue("@id", idCliente);
-                var fechaBaja = cmdBaja.ExecuteScalar();
-
-                return fechaBaja == null || fechaBaja == DBNull.Value;
+                return Convert.ToInt32(cmdSocio.ExecuteScalar()) > 0;
             }
         }
 
-        private int GetClienteId(MySqlConnection conn)
+        private int ObtenerIDCliente(MySqlConnection conn)
         {
             using (var cmd = new MySqlCommand(
                 "SELECT id FROM Cliente WHERE dni=@dni", conn))
@@ -799,7 +892,7 @@ namespace ClubDeportivoLogin
                 using (var conn = conexion.Conectar())
                 {
                     // Obtener ID del cliente si existe
-                    int idCliente = _clienteExiste ? GetClienteId(conn) : 0;
+                    int idCliente = _clienteExiste ? ObtenerIDCliente(conn) : 0;
 
                     // Recuperar número de carnet anterior si es ex-socio
                     RecuperarCarnetAnterior(conn, idCliente);
@@ -844,8 +937,8 @@ namespace ClubDeportivoLogin
             {
                 var cmd = new MySqlCommand(
                     @"SELECT fechaInscripcion, fechaBaja 
-            FROM Socio 
-            WHERE id = @id AND fechaBaja IS NOT NULL",
+                    FROM Socio 
+                    WHERE id = @id AND fechaBaja IS NOT NULL",
                     conn);
                 cmd.Parameters.AddWithValue("@id", idCliente);
 
@@ -867,7 +960,7 @@ namespace ClubDeportivoLogin
                         MessageBox.Show(
                             $"Este cliente fue socio anteriormente durante {años} años y {meses} meses.\n" +
                             $"Período: {inicio:dd/MM/yyyy} - {fin:dd/MM/yyyy}",
-                            "Antigüedad de Socio",
+                            "DATOS EX-SOCIO",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
                     }
@@ -882,17 +975,17 @@ namespace ClubDeportivoLogin
                 if (dateBaja.Value < DateTime.Today)
                 {
                     MessageBox.Show("La fecha de baja no puede ser anterior al día actual.",
-                                  "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                  "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     dateBaja.Value = DateTime.Today;
                     return;
                 }
 
                 string mensaje = dateBaja.Value == DateTime.Today
-                    ? "¿Está seguro que desea dar de baja al socio efectiva inmediatamente?"
+                    ? "¿Está seguro que desea dar de baja al socio inmediatamente?"
                     : $"¿Está seguro que desea programar la baja del socio para el {dateBaja.Value.ToShortDateString()}?";
 
                 DialogResult result = MessageBox.Show(mensaje,
-                    "Confirmar baja",
+                    "CONFIRMAR BAJA",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
 
@@ -1057,6 +1150,83 @@ namespace ClubDeportivoLogin
                 return "SOCIO AL DIA";
             }
 
+        }
+
+        private void CargarPagos()
+        {
+            try
+            {
+                Conexion conn = new Conexion();
+                using MySqlConnection conexion = conn.Conectar();
+
+                int idCliente;
+                using (var cmdId = new MySqlCommand("SELECT id FROM Cliente WHERE dni=@dni", conexion))
+                {
+                    cmdId.Parameters.AddWithValue("@dni", dniCliente);
+                    idCliente = Convert.ToInt32(cmdId.ExecuteScalar());
+                }
+
+                string query = @"
+                SELECT 
+                DATE_FORMAT(c.fechaPago, '%d/%m/%Y') AS 'Fecha de Pago',
+                c.medioPago AS 'Medio de Pago',
+                CONCAT('$ ', FORMAT(c.montoTotal, 2, 'es_AR')) AS 'Monto Total',
+                'ABONO MENSUAL' AS Concepto,
+                'ACCESO A TODAS' AS Actividad,
+                c.comprobante AS 'Comprobante'
+                FROM Cuota c
+                INNER JOIN Cliente cli ON cli.id = c.idSocio
+                WHERE c.IdSocio = @idcliente AND c.fechaPago IS NOT NULL
+
+                UNION ALL
+
+                SELECT 
+                DATE_FORMAT(r.fechaPago, '%d/%m/%Y') AS 'Fecha de Pago',
+                r.medioPago AS 'Medio de Pago',
+                CONCAT('$ ', FORMAT(r.montoTotal, 2, 'es_AR')) AS 'Monto Total',
+                'PASE DIARIO' AS Concepto,
+                a.nombre AS Actividad,
+                r.comprobante AS 'Comprobante'
+                FROM RegistroActividad r
+                INNER JOIN Cliente cli ON cli.id = r.idNoSocio
+                INNER JOIN Actividad a ON a.id = r.idActividad
+                WHERE r.IdNoSocio =  @idcliente
+
+                ORDER BY `Fecha de Pago` DESC
+                ";
+
+                using MySqlCommand cmd = new MySqlCommand(query, conexion);
+                cmd.Parameters.AddWithValue("@idCliente", idCliente);
+
+                using MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                DataTable tabla = new DataTable();
+                adapter.Fill(tabla);
+
+                dgvPagos.DataSource = tabla;
+                ConfigurarGrid();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar pagos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ConfigurarGrid()
+        {
+            dgvPagos.ReadOnly = true;
+            dgvPagos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvPagos.MultiSelect = false;
+            dgvPagos.AllowUserToAddRows = false;
+            dgvPagos.AllowUserToDeleteRows = false;
+            dgvPagos.AllowUserToResizeRows = false;
+            dgvPagos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dgvPagos.RowHeadersVisible = false;
+            dgvPagos.DefaultCellStyle.Font = new Font("Segoe UI", 9);
+            dgvPagos.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+            dgvPagos.DefaultCellStyle.BackColor = Color.White;
+            dgvPagos.AlternatingRowsDefaultCellStyle.BackColor = Color.AliceBlue;
+            dgvPagos.DefaultCellStyle.SelectionBackColor = Color.LightSteelBlue;
+            dgvPagos.DefaultCellStyle.SelectionForeColor = Color.Black;
         }
 
     }

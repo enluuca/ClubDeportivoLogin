@@ -41,18 +41,19 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI Semibold", 9.818182F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(21, 43);
+            label1.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.Location = new Point(27, 35);
             label1.Name = "label1";
-            label1.Size = new Size(169, 20);
+            label1.Size = new Size(134, 15);
             label1.TabIndex = 0;
             label1.Text = "CONTRASEÑA ACTUAL:";
             // 
             // txtPassActual
             // 
-            txtPassActual.Location = new Point(192, 40);
+            txtPassActual.Location = new Point(168, 32);
+            txtPassActual.Margin = new Padding(3, 2, 3, 2);
             txtPassActual.Name = "txtPassActual";
-            txtPassActual.Size = new Size(157, 26);
+            txtPassActual.Size = new Size(138, 23);
             txtPassActual.TabIndex = 1;
             txtPassActual.TextAlign = HorizontalAlignment.Center;
             txtPassActual.UseSystemPasswordChar = true;
@@ -60,46 +61,49 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI Semibold", 9.818182F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(21, 87);
+            label2.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label2.Location = new Point(33, 70);
             label2.Name = "label2";
-            label2.Size = new Size(164, 20);
+            label2.Size = new Size(128, 15);
             label2.TabIndex = 6;
             label2.Text = "CONTRASEÑA NUEVA:";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Font = new Font("Segoe UI Semibold", 9.818182F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.Location = new Point(63, 129);
+            label3.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label3.Location = new Point(66, 103);
             label3.Name = "label3";
-            label3.Size = new Size(122, 20);
+            label3.Size = new Size(95, 15);
             label3.TabIndex = 7;
             label3.Text = "REPETIR NUEVA:";
             // 
             // txtPassNueva
             // 
-            txtPassNueva.Location = new Point(191, 85);
+            txtPassNueva.Location = new Point(167, 67);
+            txtPassNueva.Margin = new Padding(3, 2, 3, 2);
             txtPassNueva.Name = "txtPassNueva";
-            txtPassNueva.Size = new Size(157, 26);
+            txtPassNueva.Size = new Size(138, 23);
             txtPassNueva.TabIndex = 8;
             txtPassNueva.TextAlign = HorizontalAlignment.Center;
             txtPassNueva.UseSystemPasswordChar = true;
             // 
             // txtRepetirNueva
             // 
-            txtRepetirNueva.Location = new Point(191, 127);
+            txtRepetirNueva.Location = new Point(167, 100);
+            txtRepetirNueva.Margin = new Padding(3, 2, 3, 2);
             txtRepetirNueva.Name = "txtRepetirNueva";
-            txtRepetirNueva.Size = new Size(157, 26);
+            txtRepetirNueva.Size = new Size(138, 23);
             txtRepetirNueva.TabIndex = 9;
             txtRepetirNueva.TextAlign = HorizontalAlignment.Center;
             txtRepetirNueva.UseSystemPasswordChar = true;
             // 
             // btnGuardar
             // 
-            btnGuardar.Location = new Point(21, 200);
+            btnGuardar.Location = new Point(18, 158);
+            btnGuardar.Margin = new Padding(3, 2, 3, 2);
             btnGuardar.Name = "btnGuardar";
-            btnGuardar.Size = new Size(149, 38);
+            btnGuardar.Size = new Size(130, 30);
             btnGuardar.TabIndex = 10;
             btnGuardar.Text = "GUARDAR";
             btnGuardar.UseVisualStyleBackColor = true;
@@ -107,9 +111,10 @@
             // 
             // btnSalir
             // 
-            btnSalir.Location = new Point(224, 200);
+            btnSalir.Location = new Point(196, 158);
+            btnSalir.Margin = new Padding(3, 2, 3, 2);
             btnSalir.Name = "btnSalir";
-            btnSalir.Size = new Size(149, 38);
+            btnSalir.Size = new Size(130, 30);
             btnSalir.TabIndex = 11;
             btnSalir.Text = "SALIR";
             btnSalir.UseVisualStyleBackColor = true;
@@ -117,10 +122,10 @@
             // 
             // FormCambiarContraseña
             // 
-            AutoScaleDimensions = new SizeF(8F, 19F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaption;
-            ClientSize = new Size(396, 250);
+            ClientSize = new Size(346, 197);
             Controls.Add(btnSalir);
             Controls.Add(btnGuardar);
             Controls.Add(txtRepetirNueva);
@@ -129,6 +134,7 @@
             Controls.Add(label2);
             Controls.Add(txtPassActual);
             Controls.Add(label1);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "FormCambiarContraseña";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "MODIFICAR CONTRASEÑA";

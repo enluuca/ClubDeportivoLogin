@@ -104,8 +104,12 @@ namespace ClubDeportivoLogin
             {
                 MessageBox.Show("Usuario y/o contraseña incorrectos", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 camposObligatorios.Visible = true;
-                txtUsuario.Text = "";
-                txtPassword.Text = "";
+                txtUsuario.Text = "USUARIO";
+                txtUsuario.ForeColor = System.Drawing.Color.Silver;
+
+                txtPassword.Text = "CONTRASEÑA";
+                txtPassword.ForeColor = System.Drawing.Color.Silver;
+                txtPassword.UseSystemPasswordChar = false;
             }
 
             conn.Close();

@@ -87,10 +87,11 @@
             // 
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
-            tabControl1.Location = new Point(39, 35);
+            tabControl1.Location = new Point(34, 28);
+            tabControl1.Margin = new Padding(3, 2, 3, 2);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(591, 335);
+            tabControl1.Size = new Size(517, 264);
             tabControl1.TabIndex = 0;
             tabControl1.Click += btnImprimirNS_Click;
             tabControl1.Leave += txtMontoNS_Leave;
@@ -107,10 +108,11 @@
             tabPage1.Controls.Add(label2);
             tabPage1.Controls.Add(lblDniS);
             tabPage1.Controls.Add(label1);
-            tabPage1.Location = new Point(4, 28);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Margin = new Padding(3, 2, 3, 2);
             tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(583, 303);
+            tabPage1.Padding = new Padding(3, 2, 3, 2);
+            tabPage1.Size = new Size(509, 236);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Pago Socio";
             tabPage1.UseVisualStyleBackColor = true;
@@ -118,9 +120,10 @@
             // btnImprimirS
             // 
             btnImprimirS.BackColor = Color.FromArgb(192, 255, 192);
-            btnImprimirS.Location = new Point(438, 113);
+            btnImprimirS.Location = new Point(383, 74);
+            btnImprimirS.Margin = new Padding(3, 2, 3, 2);
             btnImprimirS.Name = "btnImprimirS";
-            btnImprimirS.Size = new Size(136, 47);
+            btnImprimirS.Size = new Size(119, 50);
             btnImprimirS.TabIndex = 40;
             btnImprimirS.Text = "Reimprimir Comprobante";
             btnImprimirS.UseVisualStyleBackColor = false;
@@ -138,19 +141,18 @@
             panel1.Controls.Add(lblMedPagoS);
             panel1.Controls.Add(txtMontoS);
             panel1.Controls.Add(comboMedPagoS);
-            panel1.Location = new Point(6, 167);
-            panel1.Margin = new Padding(3, 4, 3, 4);
+            panel1.Location = new Point(5, 132);
             panel1.Name = "panel1";
-            panel1.Size = new Size(571, 132);
+            panel1.Size = new Size(500, 104);
             panel1.TabIndex = 34;
             // 
             // lblTotalDescuentoS
             // 
             lblTotalDescuentoS.Font = new Font("Segoe UI Semibold", 11.1272726F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTotalDescuentoS.ForeColor = Color.DarkGreen;
-            lblTotalDescuentoS.Location = new Point(223, 11);
+            lblTotalDescuentoS.Location = new Point(195, 9);
             lblTotalDescuentoS.Name = "lblTotalDescuentoS";
-            lblTotalDescuentoS.Size = new Size(339, 29);
+            lblTotalDescuentoS.Size = new Size(297, 23);
             lblTotalDescuentoS.TabIndex = 33;
             lblTotalDescuentoS.TextAlign = ContentAlignment.MiddleRight;
             // 
@@ -158,28 +160,26 @@
             // 
             label13.AutoSize = true;
             label13.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold | FontStyle.Underline, GraphicsUnit.Point, 0);
-            label13.Location = new Point(13, 11);
+            label13.Location = new Point(11, 9);
             label13.Name = "label13";
-            label13.Size = new Size(201, 20);
+            label13.Size = new Size(177, 17);
             label13.TabIndex = 32;
             label13.Text = "DETALLE DEL PRIMER PAGO:";
             // 
             // txtCuotasS
             // 
-            txtCuotasS.Location = new Point(453, 95);
-            txtCuotasS.Margin = new Padding(3, 4, 3, 4);
+            txtCuotasS.Location = new Point(396, 75);
             txtCuotasS.Name = "txtCuotasS";
-            txtCuotasS.Size = new Size(76, 26);
+            txtCuotasS.Size = new Size(67, 23);
             txtCuotasS.TabIndex = 31;
             txtCuotasS.TextAlign = HorizontalAlignment.Center;
             txtCuotasS.Visible = false;
             // 
             // txtDescuentoS
             // 
-            txtDescuentoS.Location = new Point(453, 53);
-            txtDescuentoS.Margin = new Padding(3, 4, 3, 4);
+            txtDescuentoS.Location = new Point(396, 42);
             txtDescuentoS.Name = "txtDescuentoS";
-            txtDescuentoS.Size = new Size(76, 26);
+            txtDescuentoS.Size = new Size(67, 23);
             txtDescuentoS.TabIndex = 30;
             txtDescuentoS.TextAlign = HorizontalAlignment.Center;
             // 
@@ -187,9 +187,9 @@
             // 
             lblDescuentoS.AutoSize = true;
             lblDescuentoS.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblDescuentoS.Location = new Point(353, 57);
+            lblDescuentoS.Location = new Point(309, 45);
             lblDescuentoS.Name = "lblDescuentoS";
-            lblDescuentoS.Size = new Size(85, 20);
+            lblDescuentoS.Size = new Size(75, 17);
             lblDescuentoS.TabIndex = 29;
             lblDescuentoS.Text = "Descuento:";
             // 
@@ -197,9 +197,9 @@
             // 
             lblCuotasS.AutoSize = true;
             lblCuotasS.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblCuotasS.Location = new Point(345, 99);
+            lblCuotasS.Location = new Point(302, 78);
             lblCuotasS.Name = "lblCuotasS";
-            lblCuotasS.Size = new Size(98, 20);
+            lblCuotasS.Size = new Size(88, 17);
             lblCuotasS.TabIndex = 28;
             lblCuotasS.Text = "Cant. Cuotas:";
             lblCuotasS.Visible = false;
@@ -208,9 +208,9 @@
             // 
             lblMontoS.AutoSize = true;
             lblMontoS.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblMontoS.Location = new Point(74, 54);
+            lblMontoS.Location = new Point(65, 43);
             lblMontoS.Name = "lblMontoS";
-            lblMontoS.Size = new Size(59, 20);
+            lblMontoS.Size = new Size(52, 17);
             lblMontoS.TabIndex = 24;
             lblMontoS.Text = "Monto:";
             // 
@@ -218,37 +218,35 @@
             // 
             lblMedPagoS.AutoSize = true;
             lblMedPagoS.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblMedPagoS.Location = new Point(18, 99);
+            lblMedPagoS.Location = new Point(16, 78);
             lblMedPagoS.Name = "lblMedPagoS";
-            lblMedPagoS.Size = new Size(117, 20);
+            lblMedPagoS.Size = new Size(103, 17);
             lblMedPagoS.TabIndex = 26;
             lblMedPagoS.Text = "Medio de Pago:";
             // 
             // txtMontoS
             // 
-            txtMontoS.Location = new Point(141, 52);
-            txtMontoS.Margin = new Padding(3, 4, 3, 4);
+            txtMontoS.Location = new Point(123, 41);
             txtMontoS.Name = "txtMontoS";
-            txtMontoS.Size = new Size(138, 26);
+            txtMontoS.Size = new Size(121, 23);
             txtMontoS.TabIndex = 25;
             // 
             // comboMedPagoS
             // 
             comboMedPagoS.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
             comboMedPagoS.FormattingEnabled = true;
-            comboMedPagoS.Location = new Point(141, 95);
-            comboMedPagoS.Margin = new Padding(3, 4, 3, 4);
+            comboMedPagoS.Location = new Point(123, 75);
             comboMedPagoS.Name = "comboMedPagoS";
-            comboMedPagoS.Size = new Size(138, 27);
+            comboMedPagoS.Size = new Size(121, 23);
             comboMedPagoS.TabIndex = 27;
             // 
             // lblEstadoS
             // 
             lblEstadoS.BorderStyle = BorderStyle.FixedSingle;
             lblEstadoS.Font = new Font("Segoe UI Semibold", 9.818182F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblEstadoS.Location = new Point(184, 114);
+            lblEstadoS.Location = new Point(161, 90);
             lblEstadoS.Name = "lblEstadoS";
-            lblEstadoS.Size = new Size(214, 27);
+            lblEstadoS.Size = new Size(188, 22);
             lblEstadoS.TabIndex = 33;
             lblEstadoS.TextAlign = ContentAlignment.MiddleCenter;
             // 
@@ -256,9 +254,9 @@
             // 
             label11.AutoSize = true;
             label11.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label11.Location = new Point(25, 117);
+            label11.Location = new Point(22, 92);
             label11.Name = "label11";
-            label11.Size = new Size(142, 20);
+            label11.Size = new Size(125, 17);
             label11.TabIndex = 32;
             label11.Text = "Vencimiento Cuota:";
             // 
@@ -266,19 +264,20 @@
             // 
             dateFePagoS.Checked = false;
             dateFePagoS.Format = DateTimePickerFormat.Short;
-            dateFePagoS.Location = new Point(445, 23);
+            dateFePagoS.Location = new Point(389, 18);
+            dateFePagoS.Margin = new Padding(3, 2, 3, 2);
             dateFePagoS.Name = "dateFePagoS";
-            dateFePagoS.Size = new Size(121, 26);
+            dateFePagoS.Size = new Size(106, 23);
             dateFePagoS.TabIndex = 31;
-            dateFePagoS.Value = new DateTime(2025, 6, 9, 14, 55, 0, 0);
+            dateFePagoS.Value = new DateTime(2025, 6, 18, 0, 0, 0, 0);
             // 
             // label5
             // 
             label5.AutoSize = true;
             label5.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label5.Location = new Point(322, 27);
+            label5.Location = new Point(282, 21);
             label5.Name = "label5";
-            label5.Size = new Size(113, 20);
+            label5.Size = new Size(100, 17);
             label5.TabIndex = 30;
             label5.Text = "Fecha de Pago:";
             // 
@@ -286,9 +285,9 @@
             // 
             lblClienteS.BorderStyle = BorderStyle.FixedSingle;
             lblClienteS.Font = new Font("Segoe UI Semibold", 11.7818184F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblClienteS.Location = new Point(184, 73);
+            lblClienteS.Location = new Point(161, 58);
             lblClienteS.Name = "lblClienteS";
-            lblClienteS.Size = new Size(214, 27);
+            lblClienteS.Size = new Size(188, 22);
             lblClienteS.TabIndex = 29;
             lblClienteS.TextAlign = ContentAlignment.MiddleCenter;
             // 
@@ -296,9 +295,9 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(25, 78);
+            label2.Location = new Point(22, 62);
             label2.Name = "label2";
-            label2.Size = new Size(60, 20);
+            label2.Size = new Size(52, 17);
             label2.TabIndex = 27;
             label2.Text = "Cliente:";
             // 
@@ -306,9 +305,9 @@
             // 
             lblDniS.BackColor = Color.LightGray;
             lblDniS.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblDniS.Location = new Point(90, 21);
+            lblDniS.Location = new Point(79, 17);
             lblDniS.Name = "lblDniS";
-            lblDniS.Size = new Size(215, 32);
+            lblDniS.Size = new Size(188, 25);
             lblDniS.TabIndex = 26;
             lblDniS.TextAlign = ContentAlignment.MiddleCenter;
             // 
@@ -316,9 +315,9 @@
             // 
             label1.BackColor = Color.LightGray;
             label1.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(22, 21);
+            label1.Location = new Point(19, 17);
             label1.Name = "label1";
-            label1.Size = new Size(67, 32);
+            label1.Size = new Size(59, 25);
             label1.TabIndex = 25;
             label1.Text = "DNI:";
             label1.TextAlign = ContentAlignment.MiddleCenter;
@@ -336,10 +335,11 @@
             tabPage2.Controls.Add(panel2);
             tabPage2.Controls.Add(lblDniNS);
             tabPage2.Controls.Add(label3);
-            tabPage2.Location = new Point(4, 28);
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Margin = new Padding(3, 2, 3, 2);
             tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(583, 303);
+            tabPage2.Padding = new Padding(3, 2, 3, 2);
+            tabPage2.Size = new Size(509, 236);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Pago No Socio";
             tabPage2.UseVisualStyleBackColor = true;
@@ -347,10 +347,11 @@
             // btnAgregarActividad
             // 
             btnAgregarActividad.BackColor = Color.DarkGray;
-            btnAgregarActividad.Font = new Font("Segoe UI", 9.163636F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnAgregarActividad.Location = new Point(380, 117);
+            btnAgregarActividad.Font = new Font("Segoe UI Semibold", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnAgregarActividad.Location = new Point(332, 92);
+            btnAgregarActividad.Margin = new Padding(3, 2, 3, 2);
             btnAgregarActividad.Name = "btnAgregarActividad";
-            btnAgregarActividad.Size = new Size(29, 27);
+            btnAgregarActividad.Size = new Size(21, 23);
             btnAgregarActividad.TabIndex = 40;
             btnAgregarActividad.Text = "+";
             btnAgregarActividad.TextAlign = ContentAlignment.TopCenter;
@@ -360,9 +361,10 @@
             // btnImprimirNS
             // 
             btnImprimirNS.BackColor = Color.FromArgb(192, 255, 192);
-            btnImprimirNS.Location = new Point(438, 106);
+            btnImprimirNS.Location = new Point(383, 73);
+            btnImprimirNS.Margin = new Padding(3, 2, 3, 2);
             btnImprimirNS.Name = "btnImprimirNS";
-            btnImprimirNS.Size = new Size(136, 47);
+            btnImprimirNS.Size = new Size(119, 50);
             btnImprimirNS.TabIndex = 39;
             btnImprimirNS.Text = "Reimprimir Comprobante";
             btnImprimirNS.UseVisualStyleBackColor = false;
@@ -371,18 +373,19 @@
             // comboBox1
             // 
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(189, 117);
+            comboBox1.Location = new Point(165, 92);
+            comboBox1.Margin = new Padding(3, 2, 3, 2);
             comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(185, 27);
+            comboBox1.Size = new Size(162, 23);
             comboBox1.TabIndex = 38;
             // 
             // label7
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label7.Location = new Point(30, 117);
+            label7.Location = new Point(26, 92);
             label7.Name = "label7";
-            label7.Size = new Size(77, 20);
+            label7.Size = new Size(67, 17);
             label7.TabIndex = 37;
             label7.Text = "Actividad:";
             // 
@@ -390,9 +393,10 @@
             // 
             dateFePagoNS.Checked = false;
             dateFePagoNS.Format = DateTimePickerFormat.Short;
-            dateFePagoNS.Location = new Point(450, 23);
+            dateFePagoNS.Location = new Point(394, 18);
+            dateFePagoNS.Margin = new Padding(3, 2, 3, 2);
             dateFePagoNS.Name = "dateFePagoNS";
-            dateFePagoNS.Size = new Size(121, 26);
+            dateFePagoNS.Size = new Size(106, 23);
             dateFePagoNS.TabIndex = 36;
             dateFePagoNS.Value = new DateTime(2025, 6, 9, 14, 55, 0, 0);
             // 
@@ -400,9 +404,9 @@
             // 
             label8.AutoSize = true;
             label8.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label8.Location = new Point(327, 27);
+            label8.Location = new Point(286, 21);
             label8.Name = "label8";
-            label8.Size = new Size(113, 20);
+            label8.Size = new Size(100, 17);
             label8.TabIndex = 35;
             label8.Text = "Fecha de Pago:";
             // 
@@ -410,9 +414,9 @@
             // 
             lblClienteNS.BorderStyle = BorderStyle.FixedSingle;
             lblClienteNS.Font = new Font("Segoe UI Semibold", 11.7818184F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblClienteNS.Location = new Point(189, 71);
+            lblClienteNS.Location = new Point(165, 56);
             lblClienteNS.Name = "lblClienteNS";
-            lblClienteNS.Size = new Size(214, 27);
+            lblClienteNS.Size = new Size(188, 22);
             lblClienteNS.TabIndex = 34;
             lblClienteNS.TextAlign = ContentAlignment.MiddleCenter;
             // 
@@ -420,9 +424,9 @@
             // 
             label10.AutoSize = true;
             label10.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label10.Location = new Point(30, 78);
+            label10.Location = new Point(26, 62);
             label10.Name = "label10";
-            label10.Size = new Size(60, 20);
+            label10.Size = new Size(52, 17);
             label10.TabIndex = 33;
             label10.Text = "Cliente:";
             // 
@@ -438,19 +442,18 @@
             panel2.Controls.Add(lblMedPagoNS);
             panel2.Controls.Add(txtMontoNS);
             panel2.Controls.Add(comboMedPagoNS);
-            panel2.Location = new Point(6, 167);
-            panel2.Margin = new Padding(3, 4, 3, 4);
+            panel2.Location = new Point(5, 132);
             panel2.Name = "panel2";
-            panel2.Size = new Size(571, 132);
+            panel2.Size = new Size(500, 104);
             panel2.TabIndex = 30;
             // 
             // lblTotalDescuentoNS
             // 
             lblTotalDescuentoNS.Font = new Font("Segoe UI Semibold", 11.1272726F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTotalDescuentoNS.ForeColor = Color.DarkGreen;
-            lblTotalDescuentoNS.Location = new Point(223, 11);
+            lblTotalDescuentoNS.Location = new Point(195, 9);
             lblTotalDescuentoNS.Name = "lblTotalDescuentoNS";
-            lblTotalDescuentoNS.Size = new Size(339, 29);
+            lblTotalDescuentoNS.Size = new Size(297, 23);
             lblTotalDescuentoNS.TabIndex = 33;
             lblTotalDescuentoNS.TextAlign = ContentAlignment.MiddleRight;
             // 
@@ -458,28 +461,26 @@
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold | FontStyle.Underline, GraphicsUnit.Point, 0);
-            label6.Location = new Point(13, 11);
+            label6.Location = new Point(11, 9);
             label6.Name = "label6";
-            label6.Size = new Size(144, 20);
+            label6.Size = new Size(126, 17);
             label6.TabIndex = 32;
             label6.Text = "DETALLE DEL PAGO:";
             // 
             // txtCuotasNS
             // 
-            txtCuotasNS.Location = new Point(453, 95);
-            txtCuotasNS.Margin = new Padding(3, 4, 3, 4);
+            txtCuotasNS.Location = new Point(396, 75);
             txtCuotasNS.Name = "txtCuotasNS";
-            txtCuotasNS.Size = new Size(76, 26);
+            txtCuotasNS.Size = new Size(67, 23);
             txtCuotasNS.TabIndex = 31;
             txtCuotasNS.TextAlign = HorizontalAlignment.Center;
             txtCuotasNS.Visible = false;
             // 
             // txtDescuentoNS
             // 
-            txtDescuentoNS.Location = new Point(453, 53);
-            txtDescuentoNS.Margin = new Padding(3, 4, 3, 4);
+            txtDescuentoNS.Location = new Point(396, 42);
             txtDescuentoNS.Name = "txtDescuentoNS";
-            txtDescuentoNS.Size = new Size(76, 26);
+            txtDescuentoNS.Size = new Size(67, 23);
             txtDescuentoNS.TabIndex = 30;
             txtDescuentoNS.TextAlign = HorizontalAlignment.Center;
             // 
@@ -487,9 +488,9 @@
             // 
             lblDescuentoNS.AutoSize = true;
             lblDescuentoNS.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblDescuentoNS.Location = new Point(353, 57);
+            lblDescuentoNS.Location = new Point(309, 45);
             lblDescuentoNS.Name = "lblDescuentoNS";
-            lblDescuentoNS.Size = new Size(85, 20);
+            lblDescuentoNS.Size = new Size(75, 17);
             lblDescuentoNS.TabIndex = 29;
             lblDescuentoNS.Text = "Descuento:";
             // 
@@ -497,9 +498,9 @@
             // 
             lblCuotasNS.AutoSize = true;
             lblCuotasNS.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblCuotasNS.Location = new Point(345, 99);
+            lblCuotasNS.Location = new Point(302, 78);
             lblCuotasNS.Name = "lblCuotasNS";
-            lblCuotasNS.Size = new Size(98, 20);
+            lblCuotasNS.Size = new Size(88, 17);
             lblCuotasNS.TabIndex = 28;
             lblCuotasNS.Text = "Cant. Cuotas:";
             lblCuotasNS.Visible = false;
@@ -508,9 +509,9 @@
             // 
             lblMontoNS.AutoSize = true;
             lblMontoNS.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblMontoNS.Location = new Point(74, 54);
+            lblMontoNS.Location = new Point(65, 43);
             lblMontoNS.Name = "lblMontoNS";
-            lblMontoNS.Size = new Size(59, 20);
+            lblMontoNS.Size = new Size(52, 17);
             lblMontoNS.TabIndex = 24;
             lblMontoNS.Text = "Monto:";
             // 
@@ -518,37 +519,35 @@
             // 
             lblMedPagoNS.AutoSize = true;
             lblMedPagoNS.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblMedPagoNS.Location = new Point(18, 99);
+            lblMedPagoNS.Location = new Point(16, 78);
             lblMedPagoNS.Name = "lblMedPagoNS";
-            lblMedPagoNS.Size = new Size(117, 20);
+            lblMedPagoNS.Size = new Size(103, 17);
             lblMedPagoNS.TabIndex = 26;
             lblMedPagoNS.Text = "Medio de Pago:";
             // 
             // txtMontoNS
             // 
-            txtMontoNS.Location = new Point(141, 52);
-            txtMontoNS.Margin = new Padding(3, 4, 3, 4);
+            txtMontoNS.Location = new Point(123, 41);
             txtMontoNS.Name = "txtMontoNS";
-            txtMontoNS.Size = new Size(138, 26);
+            txtMontoNS.Size = new Size(121, 23);
             txtMontoNS.TabIndex = 25;
             // 
             // comboMedPagoNS
             // 
             comboMedPagoNS.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
             comboMedPagoNS.FormattingEnabled = true;
-            comboMedPagoNS.Location = new Point(141, 97);
-            comboMedPagoNS.Margin = new Padding(3, 4, 3, 4);
+            comboMedPagoNS.Location = new Point(123, 77);
             comboMedPagoNS.Name = "comboMedPagoNS";
-            comboMedPagoNS.Size = new Size(138, 27);
+            comboMedPagoNS.Size = new Size(121, 23);
             comboMedPagoNS.TabIndex = 27;
             // 
             // lblDniNS
             // 
             lblDniNS.BackColor = Color.LightGray;
             lblDniNS.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblDniNS.Location = new Point(93, 22);
+            lblDniNS.Location = new Point(81, 17);
             lblDniNS.Name = "lblDniNS";
-            lblDniNS.Size = new Size(215, 32);
+            lblDniNS.Size = new Size(188, 25);
             lblDniNS.TabIndex = 26;
             lblDniNS.TextAlign = ContentAlignment.MiddleCenter;
             // 
@@ -556,18 +555,19 @@
             // 
             label3.BackColor = Color.LightGray;
             label3.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.Location = new Point(25, 22);
+            label3.Location = new Point(22, 17);
             label3.Name = "label3";
-            label3.Size = new Size(67, 32);
+            label3.Size = new Size(59, 25);
             label3.TabIndex = 25;
             label3.Text = "DNI:";
             label3.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // btnSalir
             // 
-            btnSalir.Location = new Point(481, 407);
+            btnSalir.Location = new Point(421, 321);
+            btnSalir.Margin = new Padding(3, 2, 3, 2);
             btnSalir.Name = "btnSalir";
-            btnSalir.Size = new Size(149, 38);
+            btnSalir.Size = new Size(130, 30);
             btnSalir.TabIndex = 1;
             btnSalir.Text = "SALIR";
             btnSalir.UseVisualStyleBackColor = true;
@@ -575,9 +575,10 @@
             // 
             // btnGuardar
             // 
-            btnGuardar.Location = new Point(314, 407);
+            btnGuardar.Location = new Point(275, 321);
+            btnGuardar.Margin = new Padding(3, 2, 3, 2);
             btnGuardar.Name = "btnGuardar";
-            btnGuardar.Size = new Size(149, 38);
+            btnGuardar.Size = new Size(130, 30);
             btnGuardar.TabIndex = 2;
             btnGuardar.Text = "GUARDAR";
             btnGuardar.UseVisualStyleBackColor = true;
@@ -585,9 +586,10 @@
             // 
             // btnBorrar
             // 
-            btnBorrar.Location = new Point(39, 407);
+            btnBorrar.Location = new Point(34, 321);
+            btnBorrar.Margin = new Padding(3, 2, 3, 2);
             btnBorrar.Name = "btnBorrar";
-            btnBorrar.Size = new Size(149, 38);
+            btnBorrar.Size = new Size(130, 30);
             btnBorrar.TabIndex = 3;
             btnBorrar.Text = "BORRAR";
             btnBorrar.UseVisualStyleBackColor = true;
@@ -598,23 +600,24 @@
             // 
             lblTipoRegistro.Font = new Font("Segoe UI Semibold", 14F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTipoRegistro.ForeColor = Color.FromArgb(192, 0, 0);
-            lblTipoRegistro.Location = new Point(226, 23);
+            lblTipoRegistro.Location = new Point(198, 18);
             lblTipoRegistro.Name = "lblTipoRegistro";
-            lblTipoRegistro.Size = new Size(404, 32);
+            lblTipoRegistro.Size = new Size(354, 25);
             lblTipoRegistro.TabIndex = 28;
             lblTipoRegistro.TextAlign = ContentAlignment.MiddleRight;
             // 
             // FormRegistrarPago
             // 
-            AutoScaleDimensions = new SizeF(8F, 19F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaption;
-            ClientSize = new Size(667, 457);
+            ClientSize = new Size(584, 361);
             Controls.Add(lblTipoRegistro);
             Controls.Add(btnBorrar);
             Controls.Add(btnGuardar);
             Controls.Add(btnSalir);
             Controls.Add(tabControl1);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "FormRegistrarPago";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "A.B.M. de \"Maestro de Pagos\"";

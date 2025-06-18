@@ -51,12 +51,13 @@ namespace ClubDeportivoLogin.pagos
                 using MySqlConnection conexion = conn.Conectar();
                 string query = @"
                 SELECT 
-                DATE_FORMAT(c.fechaPago, '%d/%m/%Y') AS 'Fecha de Pago',
-                CONCAT(cli.nombre, ' ', cli.apellido) AS 'Nombre y Apellido',
+                DATE_FORMAT(c.fechaPago, '%d/%m/%Y') AS 'Fecha',
+                CONCAT(cli.nombre, ' ', cli.apellido) AS 'Nombre',
                 c.medioPago AS 'Medio de Pago',
-                CONCAT('$ ', FORMAT(c.montoTotal, 2, 'es_AR')) AS 'Monto Total',
+                CONCAT('$ ', FORMAT(c.montoTotal, 2, 'es_AR')) AS 'Monto',
                 'ABONO MENSUAL' AS Concepto,
-                'Acceso a todas' AS Actividad
+                'ACCESO A TODAS' AS Actividad,
+                c.comprobante AS 'Comprobante'
                 FROM Cuota c
                 INNER JOIN Cliente cli ON cli.id = c.idSocio
                 WHERE c.fechaPago IS NOT NULL
@@ -64,18 +65,19 @@ namespace ClubDeportivoLogin.pagos
                 UNION ALL
 
                 SELECT 
-                DATE_FORMAT(r.fechaPago, '%d/%m/%Y') AS 'Fecha de Pago',
-                CONCAT(cli.nombre, ' ', cli.apellido) AS 'Nombre y Apellido',
+                DATE_FORMAT(r.fechaPago, '%d/%m/%Y') AS 'Fecha',
+                CONCAT(cli.nombre, ' ', cli.apellido) AS 'Nombre',
                 r.medioPago AS 'Medio de Pago',
-                CONCAT('$ ', FORMAT(r.montoTotal, 2, 'es_AR')) AS 'Monto Total',
+                CONCAT('$ ', FORMAT(r.montoTotal, 2, 'es_AR')) AS 'Monto',
                 'PASE DIARIO' AS Concepto,
-                a.nombre AS Actividad
+                a.nombre AS Actividad,
+                r.comprobante AS 'Comprobante'
                 FROM RegistroActividad r
                 INNER JOIN Cliente cli ON cli.id = r.idNoSocio
                 INNER JOIN Actividad a ON a.id = r.idActividad
                 WHERE r.fechaPago IS NOT NULL
 
-                ORDER BY `Fecha de Pago` DESC
+                ORDER BY `Fecha` DESC
                 ";
 
                 using MySqlCommand cmd = new MySqlCommand(query, conexion);
@@ -102,8 +104,8 @@ namespace ClubDeportivoLogin.pagos
             dgvPagos.AllowUserToResizeRows = false;
             dgvPagos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             dgvPagos.RowHeadersVisible = false;
-            dgvPagos.DefaultCellStyle.Font = new Font("Segoe UI", 10);
-            dgvPagos.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            dgvPagos.DefaultCellStyle.Font = new Font("Segoe UI", 9);
+            dgvPagos.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 8, FontStyle.Bold);
             dgvPagos.DefaultCellStyle.BackColor = Color.White;
             dgvPagos.AlternatingRowsDefaultCellStyle.BackColor = Color.AliceBlue;
             dgvPagos.DefaultCellStyle.SelectionBackColor = Color.LightSteelBlue;

@@ -45,10 +45,9 @@
             // 
             btnABMCliente.BackColor = Color.FromArgb(255, 255, 192);
             btnABMCliente.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnABMCliente.Location = new Point(64, 86);
-            btnABMCliente.Margin = new Padding(3, 4, 3, 4);
+            btnABMCliente.Location = new Point(56, 68);
             btnABMCliente.Name = "btnABMCliente";
-            btnABMCliente.Size = new Size(146, 106);
+            btnABMCliente.Size = new Size(128, 84);
             btnABMCliente.TabIndex = 0;
             btnABMCliente.Text = "A.B.M. CLIENTES";
             btnABMCliente.UseVisualStyleBackColor = false;
@@ -58,10 +57,9 @@
             // 
             btnFacturar.BackColor = Color.FromArgb(255, 255, 192);
             btnFacturar.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnFacturar.Location = new Point(246, 86);
-            btnFacturar.Margin = new Padding(3, 4, 3, 4);
+            btnFacturar.Location = new Point(215, 68);
             btnFacturar.Name = "btnFacturar";
-            btnFacturar.Size = new Size(146, 106);
+            btnFacturar.Size = new Size(128, 84);
             btnFacturar.TabIndex = 1;
             btnFacturar.Text = " A.B.M. \r\nPAGOS";
             btnFacturar.UseVisualStyleBackColor = false;
@@ -71,10 +69,9 @@
             // 
             btnLisMorosos.BackColor = Color.FromArgb(255, 255, 192);
             btnLisMorosos.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnLisMorosos.Location = new Point(428, 234);
-            btnLisMorosos.Margin = new Padding(3, 4, 3, 4);
+            btnLisMorosos.Location = new Point(374, 185);
             btnLisMorosos.Name = "btnLisMorosos";
-            btnLisMorosos.Size = new Size(146, 106);
+            btnLisMorosos.Size = new Size(128, 84);
             btnLisMorosos.TabIndex = 2;
             btnLisMorosos.Text = "LISTAR MOROSOS";
             btnLisMorosos.UseVisualStyleBackColor = false;
@@ -85,9 +82,9 @@
             usuarioActivo.BackColor = SystemColors.InactiveCaption;
             usuarioActivo.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             usuarioActivo.ForeColor = Color.Blue;
-            usuarioActivo.Location = new Point(14, 23);
+            usuarioActivo.Location = new Point(12, 18);
             usuarioActivo.Name = "usuarioActivo";
-            usuarioActivo.Size = new Size(640, 38);
+            usuarioActivo.Size = new Size(560, 30);
             usuarioActivo.TabIndex = 3;
             usuarioActivo.TextAlign = ContentAlignment.MiddleLeft;
             usuarioActivo.Click += label1_Click;
@@ -96,10 +93,9 @@
             // 
             btnABMActividades.BackColor = Color.FromArgb(255, 255, 192);
             btnABMActividades.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnABMActividades.Location = new Point(428, 86);
-            btnABMActividades.Margin = new Padding(3, 4, 3, 4);
+            btnABMActividades.Location = new Point(374, 68);
             btnABMActividades.Name = "btnABMActividades";
-            btnABMActividades.Size = new Size(146, 106);
+            btnABMActividades.Size = new Size(128, 84);
             btnABMActividades.TabIndex = 4;
             btnABMActividades.Text = "A.B.M. ACTIVIDADES";
             btnABMActividades.UseVisualStyleBackColor = false;
@@ -109,10 +105,9 @@
             // 
             btnLisPagos.BackColor = Color.FromArgb(255, 255, 192);
             btnLisPagos.Font = new Font("Segoe UI", 11.1272726F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnLisPagos.Location = new Point(246, 234);
-            btnLisPagos.Margin = new Padding(3, 4, 3, 4);
+            btnLisPagos.Location = new Point(215, 185);
             btnLisPagos.Name = "btnLisPagos";
-            btnLisPagos.Size = new Size(146, 106);
+            btnLisPagos.Size = new Size(128, 84);
             btnLisPagos.TabIndex = 5;
             btnLisPagos.Text = "LISTAR PAGOS HISTORICO";
             btnLisPagos.UseVisualStyleBackColor = false;
@@ -122,10 +117,9 @@
             // 
             btnLisClientes.BackColor = Color.FromArgb(255, 255, 192);
             btnLisClientes.Font = new Font("Segoe UI", 11.1272726F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnLisClientes.Location = new Point(64, 234);
-            btnLisClientes.Margin = new Padding(3, 4, 3, 4);
+            btnLisClientes.Location = new Point(56, 185);
             btnLisClientes.Name = "btnLisClientes";
-            btnLisClientes.Size = new Size(146, 106);
+            btnLisClientes.Size = new Size(128, 84);
             btnLisClientes.TabIndex = 6;
             btnLisClientes.Text = "LISTAR CLIENTES HISTORICO";
             btnLisClientes.UseVisualStyleBackColor = false;
@@ -134,10 +128,9 @@
             // cerrarSesion
             // 
             cerrarSesion.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            cerrarSesion.Location = new Point(338, 404);
-            cerrarSesion.Margin = new Padding(3, 4, 3, 4);
+            cerrarSesion.Location = new Point(296, 319);
             cerrarSesion.Name = "cerrarSesion";
-            cerrarSesion.Size = new Size(149, 38);
+            cerrarSesion.Size = new Size(130, 30);
             cerrarSesion.TabIndex = 7;
             cerrarSesion.Text = "CERRAR SESION";
             cerrarSesion.UseVisualStyleBackColor = true;
@@ -146,10 +139,9 @@
             // btnSalir
             // 
             btnSalir.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnSalir.Location = new Point(505, 404);
-            btnSalir.Margin = new Padding(3, 4, 3, 4);
+            btnSalir.Location = new Point(442, 319);
             btnSalir.Name = "btnSalir";
-            btnSalir.Size = new Size(149, 38);
+            btnSalir.Size = new Size(130, 30);
             btnSalir.TabIndex = 8;
             btnSalir.Text = "SALIR";
             btnSalir.UseVisualStyleBackColor = true;
@@ -160,9 +152,10 @@
             btnModPass.BackColor = Color.White;
             btnModPass.Font = new Font("Segoe UI Semibold", 9.163636F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnModPass.ForeColor = Color.Blue;
-            btnModPass.Location = new Point(446, 25);
+            btnModPass.Location = new Point(348, 20);
+            btnModPass.Margin = new Padding(3, 2, 3, 2);
             btnModPass.Name = "btnModPass";
-            btnModPass.Size = new Size(199, 32);
+            btnModPass.Size = new Size(216, 25);
             btnModPass.TabIndex = 9;
             btnModPass.Text = "CAMBIAR CONTRASEÑA";
             btnModPass.UseVisualStyleBackColor = false;
@@ -172,10 +165,9 @@
             btnUsers.BackColor = Color.FromArgb(255, 255, 192);
             btnUsers.Font = new Font("Segoe UI Semibold", 9.163636F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnUsers.ForeColor = Color.FromArgb(192, 0, 0);
-            btnUsers.Location = new Point(64, 404);
-            btnUsers.Margin = new Padding(3, 4, 3, 4);
+            btnUsers.Location = new Point(56, 319);
             btnUsers.Name = "btnUsers";
-            btnUsers.Size = new Size(268, 38);
+            btnUsers.Size = new Size(234, 30);
             btnUsers.TabIndex = 10;
             btnUsers.Text = "ADMINISTRAR USUARIOS";
             btnUsers.UseVisualStyleBackColor = false;
@@ -183,11 +175,11 @@
             // 
             // MenuPrincipal
             // 
-            AutoScaleDimensions = new SizeF(8F, 19F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaption;
             CancelButton = cerrarSesion;
-            ClientSize = new Size(667, 457);
+            ClientSize = new Size(584, 361);
             Controls.Add(btnUsers);
             Controls.Add(btnModPass);
             Controls.Add(btnSalir);
@@ -199,7 +191,6 @@
             Controls.Add(btnLisMorosos);
             Controls.Add(btnFacturar);
             Controls.Add(btnABMCliente);
-            Margin = new Padding(3, 4, 3, 4);
             Name = "MenuPrincipal";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "MENU PRINCIPAL";

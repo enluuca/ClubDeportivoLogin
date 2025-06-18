@@ -34,11 +34,10 @@ namespace ClubDeportivoLogin
                 using MySqlConnection conexion = conn.Conectar();
                 string query = @"
                 SELECT 
-                c.nombre AS Nombre, 
-                c.apellido AS Apellido, 
+                CONCAT(c.nombre, ' ', c.apellido) AS 'Nombre',   
                 c.dni AS DNI, 
                 s.numeroCarnet AS 'N° Carnet', 
-                s.fechaVencimientoCuota AS 'Vencimiento Cuota'
+                s.fechaVencimientoCuota AS 'Vencimiento'
                 FROM Cliente c
                 INNER JOIN Socio s ON c.id = s.id
                 WHERE s.fechaBaja IS NULL
@@ -60,7 +59,7 @@ namespace ClubDeportivoLogin
 
                 foreach (DataRow row in tabla.Rows)
                 {
-                    if (DateTime.TryParse(row["Vencimiento Cuota"]?.ToString(), out DateTime fechaVenc))
+                    if (DateTime.TryParse(row["Vencimiento"]?.ToString(), out DateTime fechaVenc))
                     {
                         int dias = (DateTime.Today - fechaVenc.Date).Days;
                         row["Días de atraso"] = dias > 0 ? dias : 0;
@@ -91,8 +90,8 @@ namespace ClubDeportivoLogin
             dgvMorosos.AllowUserToResizeRows = false;
             dgvMorosos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             dgvMorosos.RowHeadersVisible = false;
-            dgvMorosos.DefaultCellStyle.Font = new Font("Segoe UI", 10);
-            dgvMorosos.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            dgvMorosos.DefaultCellStyle.Font = new Font("Segoe UI", 9);
+            dgvMorosos.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 8, FontStyle.Bold);
             dgvMorosos.DefaultCellStyle.BackColor = Color.White;
             dgvMorosos.AlternatingRowsDefaultCellStyle.BackColor = Color.AliceBlue;
             dgvMorosos.DefaultCellStyle.SelectionBackColor = Color.LightSteelBlue;

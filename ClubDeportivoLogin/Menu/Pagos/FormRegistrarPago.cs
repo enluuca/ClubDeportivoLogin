@@ -13,6 +13,7 @@ namespace ClubDeportivoLogin
         private bool esConsulta = false;
         private string consultaCentro;
         private int consultaIdComprobante;
+        
 
         public FormRegistrarPago(int dni)
         {
@@ -52,6 +53,7 @@ namespace ClubDeportivoLogin
             txtDescuentoS.TextChanged += (s, e) => CalcularTotalDescuentoSocio();
             txtMontoNS.TextChanged += (s, e) => CalcularTotalDescuentoNoSocio();
             txtDescuentoNS.TextChanged += (s, e) => CalcularTotalDescuentoNoSocio();
+            
 
             if (esConsulta)
             {
@@ -606,8 +608,8 @@ namespace ClubDeportivoLogin
                     // REGISTRAR PRÓXIMA CUOTA PENDIENTE
                     var cmdProx = new MySqlCommand(
                         @"INSERT INTO Cuota 
-                        (idSocio, fechaVencimiento, monto, estado)
-                        VALUES (@idSocio, @fechaVenc, @monto, 'Pendiente')", conn);
+                        (idSocio, fechaVencimiento, monto)
+                        VALUES (@idSocio, @fechaVenc, @monto)", conn);
 
                     cmdProx.Parameters.AddWithValue("@idSocio", idCliente);
                     cmdProx.Parameters.AddWithValue("@fechaVenc", dateFePagoS.Value.AddMonths(1));
@@ -736,6 +738,75 @@ namespace ClubDeportivoLogin
         }
         private void btnBorrar_Click(object sender, EventArgs e)
         {
+            DateTime fechaPago = DateTime.MinValue;
+
+            // Obtener la fecha de pago del comprobante a eliminar
+            using (var conn = conexion.Conectar())
+            {
+                if (esConsulta)
+                {
+                    if (consultaCentro == "100")
+                    {
+                        using (var cmd = new MySqlCommand("SELECT fechaPago FROM Cuota WHERE id = @id", conn))
+                        {
+                            cmd.Parameters.AddWithValue("@id", ultimoIdPago);
+                            var result = cmd.ExecuteScalar();
+                            if (result != null && result != DBNull.Value)
+                                fechaPago = Convert.ToDateTime(result);
+                        }
+                    }
+                    else if (consultaCentro == "200")
+                    {
+                        using (var cmd = new MySqlCommand("SELECT fechaPago FROM RegistroActividad WHERE id = @id", conn))
+                        {
+                            cmd.Parameters.AddWithValue("@id", ultimoIdPago);
+                            var result = cmd.ExecuteScalar();
+                            if (result != null && result != DBNull.Value)
+                                fechaPago = Convert.ToDateTime(result);
+                        }
+                    }
+                }
+                else
+                {
+                    if (esSocio)
+                    {
+                        using (var cmd = new MySqlCommand(
+                            "SELECT fechaPago FROM Cuota WHERE idSocio = @idSocio AND fechaPago IS NOT NULL ORDER BY fechaPago DESC LIMIT 1", conn))
+                        {
+                            cmd.Parameters.AddWithValue("@idSocio", idCliente);
+                            var result = cmd.ExecuteScalar();
+                            if (result != null && result != DBNull.Value)
+                                fechaPago = Convert.ToDateTime(result);
+                        }
+                    }
+                    else
+                    {
+                        using (var cmd = new MySqlCommand(
+                            "SELECT fechaPago FROM RegistroActividad WHERE idNoSocio = @idNoSocio ORDER BY fechaPago DESC LIMIT 1", conn))
+                        {
+                            cmd.Parameters.AddWithValue("@idNoSocio", idCliente);
+                            var result = cmd.ExecuteScalar();
+                            if (result != null && result != DBNull.Value)
+                                fechaPago = Convert.ToDateTime(result);
+                        }
+                    }
+                }
+            }
+
+            // Validar antigüedad
+            if (fechaPago != DateTime.MinValue)
+            {
+                int dias = (DateTime.Today - fechaPago.Date).Days;
+                if (dias >= 30)
+                {
+                    MessageBox.Show(
+                        "El sistema no permite borrar comprobantes antiguos cuya fecha de pago es mayor o igual a 30 días.",
+                        "ADVERTENCIA",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+            }
             var confirm = MessageBox.Show(
                 "¿Está seguro que desea eliminar este comprobante? Esta acción no se puede revertir.",
                 "Confirmar eliminación",
@@ -747,27 +818,26 @@ namespace ClubDeportivoLogin
 
             if (esConsulta)
             {
-                if (consultaCentro == "100")
+                using (var conn = conexion.Conectar())
                 {
-                    var adv = MessageBox.Show(
-                        "Al eliminar este pago, la próxima cuota pendiente (si existe) también será eliminada. ¿Desea continuar?",
-                        "Advertencia para socios",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Warning);
-
-                    if (adv != DialogResult.Yes)
-                        return;
-
-                    using (var conn = conexion.Conectar())
+                    if (consultaCentro == "100")
                     {
-                        // Eliminar próxima cuota pendiente
+                        var adv = MessageBox.Show(
+                            "Al eliminar este pago, la próxima cuota pendiente (si existe) también será eliminada. ¿Desea continuar?",
+                            "Advertencia para socios",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Warning);
+
+                        if (adv != DialogResult.Yes)
+                            return;
+
                         var cmdDelProx = new MySqlCommand(
                             @"DELETE FROM Cuota 
-                            WHERE idSocio = @idSocio 
-                            AND estado = 'Pendiente'
-                            AND fechaVencimiento = (SELECT DATE_ADD(MAX(fechaPago), INTERVAL 1 MONTH) 
-                            FROM Cuota 
-                            WHERE idSocio = @idSocio)", conn);
+                    WHERE idSocio = @idSocio 
+                    AND fechaPago IS NULL
+                    AND fechaVencimiento = (SELECT DATE_ADD(MAX(fechaPago), INTERVAL 1 MONTH) 
+                    FROM Cuota 
+                    WHERE idSocio = @idSocio)", conn);
                         cmdDelProx.Parameters.AddWithValue("@idSocio", idCliente);
                         int proxDeleted = cmdDelProx.ExecuteNonQuery();
 
@@ -782,7 +852,7 @@ namespace ClubDeportivoLogin
                         // Eliminar el pago actual
                         var cmdClean = new MySqlCommand(
                             @"DELETE FROM Cuota 
-                          WHERE id = @id", conn);
+                    WHERE id = @id", conn);
                         cmdClean.Parameters.AddWithValue("@id", ultimoIdPago);
                         int rows = cmdClean.ExecuteNonQuery();
 
@@ -791,12 +861,9 @@ namespace ClubDeportivoLogin
                         else
                             MessageBox.Show("No se encontró comprobante para borrar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
-                }
-                else if (consultaCentro == "200")
-                {
-                    using (var conn = conexion.Conectar())
-                    using (var cmd = new MySqlCommand("DELETE FROM RegistroActividad WHERE id = @id", conn))
+                    else if (consultaCentro == "200")
                     {
+                        var cmd = new MySqlCommand("DELETE FROM RegistroActividad WHERE id = @id", conn);
                         cmd.Parameters.AddWithValue("@id", ultimoIdPago);
                         int rows = cmd.ExecuteNonQuery();
                         if (rows > 0)
@@ -841,9 +908,9 @@ namespace ClubDeportivoLogin
                     // Eliminar próxima cuota pendiente
                     var cmdDelProx = new MySqlCommand(
                         @"DELETE FROM Cuota 
-                        WHERE idSocio = @idSocio 
-                        AND fechaPago IS NULL 
-                        AND id > @id", conn);
+                WHERE idSocio = @idSocio 
+                AND fechaPago IS NULL 
+                AND id > @id", conn);
                     cmdDelProx.Parameters.AddWithValue("@idSocio", idCliente);
                     cmdDelProx.Parameters.AddWithValue("@id", idUltimaCuota);
                     cmdDelProx.ExecuteNonQuery();
@@ -851,7 +918,7 @@ namespace ClubDeportivoLogin
                     // Eliminar el pago actual
                     var cmdClean = new MySqlCommand(
                         @"DELETE FROM Cuota 
-                        WHERE id = @id", conn);
+                WHERE id = @id", conn);
                     cmdClean.Parameters.AddWithValue("@id", idUltimaCuota);
                     int rows = cmdClean.ExecuteNonQuery();
 
