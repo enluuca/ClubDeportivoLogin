@@ -17,6 +17,7 @@ namespace ClubDeportivoLogin
             dniCliente = dni;
             InitializeEventHandlers();
 
+            
             // Mostrar mensaje inicial sobre el DNI
             using (var conn = conexion.Conectar())
             {
@@ -26,24 +27,11 @@ namespace ClubDeportivoLogin
                 {
                     string tipoCliente = EsSocioActivo() ? "SOCIO" : "NO SOCIO";
                     string nombreCompleto = ObtenerNombreCompletoCliente(conn);
-                    MessageBox.Show($"DNI encontrado: {tipoCliente} - {nombreCompleto}",
-                                  "Cliente existente",
-                                  MessageBoxButtons.OK,
-                                  MessageBoxIcon.Information);
+                    MessageBox.Show($"DNI encontrado: {tipoCliente} - {nombreCompleto}","Cliente existente",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 }
-                else
-                {
-                    var respuesta = MessageBox.Show($"El DNI {dni} no está registrado. ¿Desea crear un nuevo cliente?",
-                                                  "Nuevo cliente",
-                                                  MessageBoxButtons.YesNo,
-                                                  MessageBoxIcon.Question);
+                
 
-                    if (respuesta == DialogResult.No)
-                    {
-                        this.Close();
-                        return;
-                    }
-                }
+               
             }
 
             comboMedPago.Items.AddRange(new string[] { "Efectivo", "Credito", "Debito" });
@@ -611,7 +599,7 @@ namespace ClubDeportivoLogin
             y += 18;
             e.Graphics.DrawString($"DNI: {dniCliente}", fontBody, Brushes.Black, left, y);
             y += 18;
-            e.Graphics.DrawString($"Concepto:...........[Acceso Total]", fontBody, Brushes.Black, left, y);
+            e.Graphics.DrawString($"Concepto:...........[ Alta Socio ]", fontBody, Brushes.Black, left, y);
             y += 18;
             e.Graphics.DrawString($"Monto original:.... $ {monto:0.00}", fontBody, Brushes.Black, left, y);
             y += 18;
