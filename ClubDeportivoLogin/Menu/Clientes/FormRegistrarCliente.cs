@@ -10,6 +10,7 @@ namespace ClubDeportivoLogin
         private Conexion conexion = new Conexion();
         private int dniCliente;
         private bool _clienteExiste;
+        private int _idCliente = 0;
 
         public FormRegistrarCliente(int dni)
         {
@@ -17,7 +18,7 @@ namespace ClubDeportivoLogin
             dniCliente = dni;
             InitializeEventHandlers();
 
-            
+
             // Mostrar mensaje inicial sobre el DNI
             using (var conn = conexion.Conectar())
             {
@@ -27,11 +28,8 @@ namespace ClubDeportivoLogin
                 {
                     string tipoCliente = EsSocioActivo() ? "SOCIO" : "NO SOCIO";
                     string nombreCompleto = ObtenerNombreCompletoCliente(conn);
-                    MessageBox.Show($"DNI encontrado: {tipoCliente} - {nombreCompleto}","Cliente existente",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                    MessageBox.Show($"DNI encontrado: {tipoCliente} - {nombreCompleto}", "Cliente existente", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                
-
-               
             }
 
             comboMedPago.Items.AddRange(new string[] { "Efectivo", "Credito", "Debito" });
@@ -78,6 +76,11 @@ namespace ClubDeportivoLogin
             bool clienteExiste = CargarDatosCliente();
             bool socioActivo = clienteExiste && EsSocioActivo();
 
+            using (var conn = conexion.Conectar())
+            {
+                _idCliente = ObtenerIDCliente(conn);
+            }
+
             if (socioActivo)
             {
                 dateBaja.Visible = true;
@@ -87,6 +90,8 @@ namespace ClubDeportivoLogin
                 lblTipoCliente.ForeColor = Color.Blue;
                 CargarDatosSocio();
                 tabPage2.Parent = tabControl1;
+                btnImprimirCarnet.Visible = true;
+                chkCarnetEntregado.Visible = true;
             }
             else
             {
@@ -321,8 +326,15 @@ namespace ClubDeportivoLogin
                     dtpInscripcion.Value = fechaInscripcion.Value;
                 if (fechaVencimiento.HasValue)
                     dtpVencimiento.Value = fechaVencimiento.Value;
-                if (numeroCarnet.HasValue)
-                    lblNumCarnet.Text = numeroCarnet.Value.ToString();
+                if (_idCliente == 0)
+                {
+                    lblNumCarnet.Text = ("PENDIENTE DE ASIGNACIÓN").ToString();
+                }
+                else
+                {
+                    if (numeroCarnet.HasValue)
+                        lblNumCarnet.Text = (1000 + _idCliente).ToString();
+                }
                 if (carnetEntregado.HasValue)
                     chkCarnetEntregado.Checked = carnetEntregado.Value;
                 if (fechaBaja.HasValue)
@@ -436,7 +448,7 @@ namespace ClubDeportivoLogin
         private void ConvertirASocio(MySqlConnection conn, int id)
         {
             // Actualizar NoSocio: poner fecha de baja en lugar de eliminar
-            var actualizarNoSocio = new MySqlCommand("UPDATE NoSocio SET fechaBaja = @fechaBaja WHERE id = @id",conn);
+            var actualizarNoSocio = new MySqlCommand("UPDATE NoSocio SET fechaBaja = @fechaBaja WHERE id = @id", conn);
             actualizarNoSocio.Parameters.AddWithValue("@fechaBaja", DateTime.Today);
             actualizarNoSocio.Parameters.AddWithValue("@id", id);
             actualizarNoSocio.ExecuteNonQuery();
@@ -449,7 +461,7 @@ namespace ClubDeportivoLogin
             if (existeSocio)
             {
                 // Reactivar socio existente
-                var reactivar = new MySqlCommand("UPDATE Socio SET fechaBaja = NULL WHERE id = @id",conn);
+                var reactivar = new MySqlCommand("UPDATE Socio SET fechaBaja = NULL WHERE id = @id", conn);
                 reactivar.Parameters.AddWithValue("@id", id);
                 reactivar.ExecuteNonQuery();
 
@@ -458,7 +470,6 @@ namespace ClubDeportivoLogin
             else
             {
                 // Nuevo socio
-                ObtenerNumeroCarnet(conn);
                 var nuevoSocio = new MySqlCommand(
                     @"INSERT INTO Socio 
                     (id, fechaInscripcion, fechaVencimientoCuota, numeroCarnet, carnetEntregado) 
@@ -469,7 +480,7 @@ namespace ClubDeportivoLogin
                 nuevoSocio.Parameters.AddWithValue("@id", id);
                 nuevoSocio.Parameters.AddWithValue("@fechaInsc", DateTime.Today);
                 nuevoSocio.Parameters.AddWithValue("@fechaVenc", DateTime.Today);
-                nuevoSocio.Parameters.AddWithValue("@numCarnet", lblNumCarnet.Text);
+                nuevoSocio.Parameters.AddWithValue("@numCarnet", 1000 + id);
                 nuevoSocio.Parameters.AddWithValue("@carnetEntregado", chkCarnetEntregado.Checked);
                 nuevoSocio.ExecuteNonQuery();
 
@@ -477,7 +488,7 @@ namespace ClubDeportivoLogin
             }
 
             // Actualizar estado en Cliente
-            var actualizarCliente = new MySqlCommand("UPDATE Cliente SET asociarse = true WHERE id = @id",conn);
+            var actualizarCliente = new MySqlCommand("UPDATE Cliente SET asociarse = true WHERE id = @id", conn);
             actualizarCliente.Parameters.AddWithValue("@id", id);
             actualizarCliente.ExecuteNonQuery();
         }
@@ -559,7 +570,63 @@ namespace ClubDeportivoLogin
             InsertarCuota(conn, idSocio, null, monto, null, 0, DateTime.Today.AddDays(30), 0, monto);
         }
 
-        // Método para imprimir el comprobante (puedes adaptarlo según tu diseño)
+        private int GuardarOActualizarCliente(MySqlConnection conn)
+        {
+            int id;
+            var comando = new MySqlCommand("SELECT id FROM Cliente WHERE dni=@dni", conn);
+            comando.Parameters.AddWithValue("@dni", dniCliente);
+            var resultado = comando.ExecuteScalar();
+
+            if (resultado != null)
+            {
+                // Actualizar cliente existente
+                id = Convert.ToInt32(resultado);
+                var actualizar = new MySqlCommand(
+                        @"UPDATE Cliente SET 
+                        nombre = @nombre, 
+                        apellido = @apellido, 
+                        fechaNacimiento = @fechaNac, 
+                        direccion = @direccion, 
+                        telefono = @telefono, 
+                        aptoFisico = @aptoFisico, 
+                        asociarse = @asociarse 
+                        WHERE id = @id", conn);
+
+                actualizar.Parameters.AddWithValue("@nombre", txtNombre.Text);
+                actualizar.Parameters.AddWithValue("@apellido", txtApellido.Text);
+                actualizar.Parameters.AddWithValue("@fechaNac", dtpFechaNacimiento.Value);
+                actualizar.Parameters.AddWithValue("@direccion", txtDireccion.Text);
+                actualizar.Parameters.AddWithValue("@telefono", txtTelefono.Text);
+                actualizar.Parameters.AddWithValue("@aptoFisico", chkAptoFisico.Checked);
+                actualizar.Parameters.AddWithValue("@asociarse", chkAsociarse.Checked);
+                actualizar.Parameters.AddWithValue("@id", id);
+                actualizar.ExecuteNonQuery();
+            }
+            else
+            {
+                // Crear nuevo cliente
+                var insertar = new MySqlCommand(
+                    @"INSERT INTO Cliente 
+                    (nombre, apellido, dni, fechaNacimiento, direccion, telefono, aptoFisico, asociarse, fechaAlta) 
+                    VALUES 
+                    (@nombre, @apellido, @dni, @fechaNac, @direccion, @telefono, @aptoFisico, @asociarse, @fechaAlta)", conn);
+
+                insertar.Parameters.AddWithValue("@nombre", txtNombre.Text);
+                insertar.Parameters.AddWithValue("@apellido", txtApellido.Text);
+                insertar.Parameters.AddWithValue("@dni", dniCliente);
+                insertar.Parameters.AddWithValue("@fechaNac", dtpFechaNacimiento.Value);
+                insertar.Parameters.AddWithValue("@direccion", txtDireccion.Text);
+                insertar.Parameters.AddWithValue("@telefono", txtTelefono.Text);
+                insertar.Parameters.AddWithValue("@aptoFisico", chkAptoFisico.Checked);
+                insertar.Parameters.AddWithValue("@asociarse", chkAsociarse.Checked);
+                insertar.Parameters.AddWithValue("@fechaAlta", DateTime.Today);
+                insertar.ExecuteNonQuery();
+                id = Convert.ToInt32(insertar.LastInsertedId);
+                int _idCliente = id; // Guardar el ID del cliente recién insertado
+            }
+            return id;
+        }
+
         private void ImprimirComprobanteSocio(PrintPageEventArgs e, int idCuota, string comprobante, decimal monto, decimal descuento, decimal montoTotal, string medioPago)
         {
             int y = 10;
@@ -599,7 +666,7 @@ namespace ClubDeportivoLogin
             y += 18;
             e.Graphics.DrawString($"DNI: {dniCliente}", fontBody, Brushes.Black, left, y);
             y += 18;
-            e.Graphics.DrawString($"Concepto:...........[ Alta Socio ]", fontBody, Brushes.Black, left, y);
+            e.Graphics.DrawString($"Concepto:............[Alta Socio]", fontBody, Brushes.Black, left, y);
             y += 18;
             e.Graphics.DrawString($"Monto original:.... $ {monto:0.00}", fontBody, Brushes.Black, left, y);
             y += 18;
@@ -647,7 +714,8 @@ namespace ClubDeportivoLogin
                 "SELECT id FROM Cliente WHERE dni=@dni", conn))
             {
                 cmd.Parameters.AddWithValue("@dni", dniCliente);
-                return Convert.ToInt32(cmd.ExecuteScalar());
+                object result = cmd.ExecuteScalar();
+                return (result == null || result == DBNull.Value) ? 0 : Convert.ToInt32(result);
             }
         }
 
@@ -673,62 +741,6 @@ namespace ClubDeportivoLogin
             }
 
             return true;
-        }
-
-        private int GuardarOActualizarCliente(MySqlConnection conn)
-        {
-            int id;
-            var comando = new MySqlCommand("SELECT id FROM Cliente WHERE dni=@dni", conn);
-            comando.Parameters.AddWithValue("@dni", dniCliente);
-            var resultado = comando.ExecuteScalar();
-
-            if (resultado != null)
-            {
-                // Actualizar cliente existente
-                id = Convert.ToInt32(resultado);
-                var actualizar = new MySqlCommand(
-                    @"UPDATE Cliente SET 
-                        nombre = @nombre, 
-                        apellido = @apellido, 
-                        fechaNacimiento = @fechaNac, 
-                        direccion = @direccion, 
-                        telefono = @telefono, 
-                        aptoFisico = @aptoFisico, 
-                        asociarse = @asociarse 
-                    WHERE id = @id", conn);
-
-                actualizar.Parameters.AddWithValue("@nombre", txtNombre.Text);
-                actualizar.Parameters.AddWithValue("@apellido", txtApellido.Text);
-                actualizar.Parameters.AddWithValue("@fechaNac", dtpFechaNacimiento.Value);
-                actualizar.Parameters.AddWithValue("@direccion", txtDireccion.Text);
-                actualizar.Parameters.AddWithValue("@telefono", txtTelefono.Text);
-                actualizar.Parameters.AddWithValue("@aptoFisico", chkAptoFisico.Checked);
-                actualizar.Parameters.AddWithValue("@asociarse", chkAsociarse.Checked);
-                actualizar.Parameters.AddWithValue("@id", id);
-                actualizar.ExecuteNonQuery();
-            }
-            else
-            {
-                // Crear nuevo cliente
-                var insertar = new MySqlCommand(
-                    @"INSERT INTO Cliente 
-                    (nombre, apellido, dni, fechaNacimiento, direccion, telefono, aptoFisico, asociarse, fechaAlta) 
-                    VALUES 
-                    (@nombre, @apellido, @dni, @fechaNac, @direccion, @telefono, @aptoFisico, @asociarse, @fechaAlta)", conn);
-
-                insertar.Parameters.AddWithValue("@nombre", txtNombre.Text);
-                insertar.Parameters.AddWithValue("@apellido", txtApellido.Text);
-                insertar.Parameters.AddWithValue("@dni", dniCliente);
-                insertar.Parameters.AddWithValue("@fechaNac", dtpFechaNacimiento.Value);
-                insertar.Parameters.AddWithValue("@direccion", txtDireccion.Text);
-                insertar.Parameters.AddWithValue("@telefono", txtTelefono.Text);
-                insertar.Parameters.AddWithValue("@aptoFisico", chkAptoFisico.Checked);
-                insertar.Parameters.AddWithValue("@asociarse", chkAsociarse.Checked);
-                insertar.Parameters.AddWithValue("@fechaAlta", DateTime.Today);
-                insertar.ExecuteNonQuery();
-                id = Convert.ToInt32(insertar.LastInsertedId);
-            }
-            return id;
         }
 
         private void ProcesarBajaSocio(MySqlConnection conn, int idSocio)
@@ -774,17 +786,6 @@ namespace ClubDeportivoLogin
             cmd.Parameters.AddWithValue("@descuento", descuento);
             cmd.Parameters.AddWithValue("@montoTotal", montoTotal);
             cmd.ExecuteNonQuery();
-        }
-
-        private void ObtenerNumeroCarnet(MySqlConnection conn)
-        {
-            // Solo generar nuevo número si no hay uno existente
-            if (string.IsNullOrEmpty(lblNumCarnet.Text) || lblNumCarnet.Text == "0")
-            {
-                var cmd = new MySqlCommand("SELECT COALESCE(MAX(numeroCarnet),0) FROM Socio", conn);
-                int max = Convert.ToInt32(cmd.ExecuteScalar());
-                lblNumCarnet.Text = (max + 1).ToString();
-            }
         }
 
         private bool ValidarCamposObligatorios()
@@ -876,14 +877,24 @@ namespace ClubDeportivoLogin
                 lblTipoCliente.Text = "REGISTRAR - SOCIO";
                 lblTipoCliente.ForeColor = Color.Blue;
                 lblEstado.ForeColor = Color.Black;
+                if (_idCliente == 0)
+                {
+                    lblNumCarnet.Text = "PENDIENTE";
+                    btnImprimirCarnet.Visible = false;
+                    chkCarnetEntregado.Visible = false;
+                }
+                else
+                {
+                    lblNumCarnet.Text = (1000 + _idCliente).ToString();
+                    btnImprimirCarnet.Visible = true;
+                    chkCarnetEntregado.Visible = true;
+                }
 
                 using (var conn = conexion.Conectar())
                 {
                     // Obtener ID del cliente si existe
                     int idCliente = _clienteExiste ? ObtenerIDCliente(conn) : 0;
-
-                    // Recuperar número de carnet anterior si es ex-socio
-                    RecuperarCarnetAnterior(conn, idCliente);
+                    _idCliente = idCliente;
 
                     // Mostrar mensaje de antigüedad si es ex-socio
                     MostrarAntiguedadExSocio(conn, idCliente);
@@ -898,25 +909,6 @@ namespace ClubDeportivoLogin
                 lblTipoCliente.Text = "REGISTRAR - NO SOCIO";
                 lblTipoCliente.ForeColor = Color.FromArgb(192, 0, 0);
             }
-        }
-
-        private void RecuperarCarnetAnterior(MySqlConnection conn, int idCliente)
-        {
-            if (idCliente > 0)
-            {
-                var cmd = new MySqlCommand(
-                    "SELECT numeroCarnet FROM Socio WHERE id = @id AND fechaBaja IS NOT NULL",
-                    conn);
-                cmd.Parameters.AddWithValue("@id", idCliente);
-
-                var result = cmd.ExecuteScalar();
-                if (result != null && result != DBNull.Value)
-                {
-                    lblNumCarnet.Text = result.ToString();
-                    return;
-                }
-            }
-            ObtenerNumeroCarnet(conn);
         }
 
         private void MostrarAntiguedadExSocio(MySqlConnection conn, int idCliente)
@@ -1092,7 +1084,8 @@ namespace ClubDeportivoLogin
                 textY += 40;
 
                 // Número de carnet (en la parte inferior)
-                string carnetText = $"Carnet N°: {lblNumCarnet.Text}";
+                int carnetNumber = 1000 + _idCliente;
+                string carnetText = $"Carnet N°: {carnetNumber}";
                 SizeF carnetSize = e.Graphics.MeasureString(carnetText, fontCarnet);
                 e.Graphics.DrawString(carnetText, fontCarnet, Brushes.DarkBlue,
                                     startX + width - carnetSize.Width - 20,

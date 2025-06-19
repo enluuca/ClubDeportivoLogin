@@ -461,6 +461,7 @@
             // comboMedPago
             // 
             comboMedPago.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            comboMedPago.DropDownStyle = ComboBoxStyle.DropDownList;
             comboMedPago.FormattingEnabled = true;
             comboMedPago.Location = new Point(123, 75);
             comboMedPago.Name = "comboMedPago";

@@ -53,7 +53,9 @@ namespace ClubDeportivoLogin
             txtDescuentoS.TextChanged += (s, e) => CalcularTotalDescuentoSocio();
             txtMontoNS.TextChanged += (s, e) => CalcularTotalDescuentoNoSocio();
             txtDescuentoNS.TextChanged += (s, e) => CalcularTotalDescuentoNoSocio();
-            
+            dateFePagoNS.Value = DateTime.Today;
+            dateFePagoS.Value = DateTime.Today;
+
 
             if (esConsulta)
             {
@@ -281,18 +283,32 @@ namespace ClubDeportivoLogin
                 int diferenciaDias = (dateFePagoS.Value.Date - fechaVencimiento.Value.Date).Days;
                 string estado;
                 if (diferenciaDias < 0)
+                {
                     estado = $"{fechaVencimiento:dd/MM/yy} ({Math.Abs(diferenciaDias)} días antes)";
+                    lblEstadoS.BackColor = Color.LightGreen;
+                    lblEstadoS.Text = estado;
+                }
                 else if (diferenciaDias > 0)
-                    estado = $"{fechaVencimiento:dd/MM/yy} ({diferenciaDias} días despues)";
+                {
+                    estado = $"{fechaVencimiento:dd/MM/yy} ({diferenciaDias} días después)";
+                    lblEstadoS.BackColor = Color.LightCoral;
+                    lblEstadoS.Text = estado;
+                }
                 else
+                {
                     estado = $"{fechaVencimiento:dd/MM/yy} (Vence Hoy)";
-                lblEstadoS.Text = estado;
+                    lblEstadoS.BackColor = Color.Yellow;
+                    lblEstadoS.Text = estado;
+                }
                 if (monto.HasValue)
+                {
                     txtMontoS.Text = monto.Value.ToString("0.00");
+                }
             }
             else
             {
                 lblEstadoS.Text = "No hay cuota pendiente";
+                lblEstadoS.BackColor = Color.Yellow;
                 txtMontoS.Text = "";
             }
 
