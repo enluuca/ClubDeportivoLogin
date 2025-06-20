@@ -264,7 +264,10 @@ namespace ClubDeportivoLogin
 
             using (var conn = conexion.Conectar())
             using (var cmd = new MySqlCommand(
-                "SELECT fechaVencimiento, monto FROM Cuota WHERE idSocio = @idSocio ORDER BY fechaVencimiento DESC LIMIT 1;", conn))
+            "SELECT fechaVencimiento, monto FROM Cuota " +
+            "WHERE idSocio = @idSocio AND fechaPago IS NULL " +  // Solo cuotas pendientes
+            "ORDER BY fechaVencimiento ASC LIMIT 1",  // La más antigua primero
+            conn))
             {
                 cmd.Parameters.AddWithValue("@idSocio", idCliente);
                 using (var reader = cmd.ExecuteReader())
@@ -899,7 +902,7 @@ namespace ClubDeportivoLogin
                         // Eliminar el pago actual
                         var cmdClean = new MySqlCommand(
                             @"DELETE FROM Cuota 
-                    WHERE id = @id", conn);
+                            WHERE id = @id", conn);
                         cmdClean.Parameters.AddWithValue("@id", ultimoIdPago);
                         int rows = cmdClean.ExecuteNonQuery();
 
@@ -955,9 +958,9 @@ namespace ClubDeportivoLogin
                     // Eliminar próxima cuota pendiente
                     var cmdDelProx = new MySqlCommand(
                         @"DELETE FROM Cuota 
-                WHERE idSocio = @idSocio 
-                AND fechaPago IS NULL 
-                AND id > @id", conn);
+                        WHERE idSocio = @idSocio 
+                        AND fechaPago IS NULL 
+                        AND id > @id", conn);
                     cmdDelProx.Parameters.AddWithValue("@idSocio", idCliente);
                     cmdDelProx.Parameters.AddWithValue("@id", idUltimaCuota);
                     cmdDelProx.ExecuteNonQuery();
