@@ -264,7 +264,7 @@ namespace ClubDeportivoLogin
 
             using (var conn = conexion.Conectar())
             using (var cmd = new MySqlCommand(
-                "SELECT fechaVencimiento, monto FROM Cuota WHERE idSocio=@idSocio AND fechaPago IS NULL ORDER BY fechaVencimiento ASC LIMIT 1", conn))
+                "SELECT fechaVencimiento, monto FROM Cuota WHERE idSocio=@idSocio AND fechaPago IS NULL ORDER BY fechaVencimiento DESC LIMIT 1", conn))
             {
                 cmd.Parameters.AddWithValue("@idSocio", idCliente);
                 using (var reader = cmd.ExecuteReader())

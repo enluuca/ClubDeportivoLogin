@@ -33,21 +33,25 @@ namespace ClubDeportivoLogin
                 Conexion conn = new Conexion();
                 using MySqlConnection conexion = conn.Conectar();
                 string query = @"
-                SELECT 
-                CONCAT(c.nombre, ' ', c.apellido) AS 'Nombre',   
-                c.dni AS DNI, 
-                s.numeroCarnet AS 'N° Carnet', 
-                s.fechaVencimientoCuota AS 'Vencimiento'
-                FROM Cliente c
-                INNER JOIN Socio s ON c.id = s.id
-                WHERE s.fechaBaja IS NULL
-                AND EXISTS (
-                            SELECT 1 FROM Cuota cu
-                            WHERE cu.idSocio = s.id
-                            AND cu.fechaVencimiento < CURDATE()
-                            AND cu.fechaPago IS NULL
-                            )
-                ORDER BY s.fechaVencimientoCuota ASC";
+                SELECT
+    CONCAT(c.nombre, ' ', c.apellido) AS Nombre,
+    c.dni AS DNI,
+    s.numeroCarnet AS `N° Carnet`,
+    cu.fechaVencimiento AS Vencimiento
+FROM Cliente c
+INNER JOIN Socio s ON c.id = s.id
+INNER JOIN Cuota cu ON cu.idSocio = s.id
+INNER JOIN (
+    -- Subconsulta que obtiene la cuota con el máximo id por socio
+    SELECT idSocio, MAX(id) AS maxIdCuota
+    FROM Cuota
+    GROUP BY idSocio
+) AS sub ON sub.idSocio = cu.idSocio AND sub.maxIdCuota = cu.id
+WHERE s.fechaBaja IS NULL
+  AND cu.fechaPago IS NULL
+  AND cu.fechaVencimiento < CURDATE()
+ORDER BY cu.fechaVencimiento ASC;
+";
 
                 using MySqlCommand cmd = new MySqlCommand(query, conexion);
                 using MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
