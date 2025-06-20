@@ -32,6 +32,7 @@
             txtCentroID = new TextBox();
             txtComprobanteID = new TextBox();
             lblmodo = new Label();
+            listSugerencia = new ListBox();
             ((System.ComponentModel.ISupportInitialize)pictureIcono).BeginInit();
             SuspendLayout();
             // 
@@ -186,6 +187,14 @@
             lblmodo.TextAlign = ContentAlignment.MiddleRight;
             lblmodo.Visible = false;
             // 
+            // listSugerencia
+            // 
+            listSugerencia.FormattingEnabled = true;
+            listSugerencia.Location = new Point(463, 53);
+            listSugerencia.Name = "listSugerencia";
+            listSugerencia.Size = new Size(175, 23);
+            listSugerencia.TabIndex = 24;
+            // 
             // FormABMBase
             // 
             AcceptButton = btnSiguiente;
@@ -194,6 +203,7 @@
             BackColor = SystemColors.ActiveCaption;
             CancelButton = btnSalir;
             ClientSize = new Size(667, 457);
+            Controls.Add(listSugerencia);
             Controls.Add(lblmodo);
             Controls.Add(txtComprobanteID);
             Controls.Add(txtCentroID);
@@ -232,5 +242,6 @@
         private TextBox txtCentroID;
         private TextBox txtComprobanteID;
         private Label lblmodo;
+        private ListBox listSugerencia;
     }
 }
