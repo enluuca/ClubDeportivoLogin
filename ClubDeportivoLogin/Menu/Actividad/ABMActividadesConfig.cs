@@ -30,14 +30,52 @@
 
                     FormRegistrarActividad form;
                     if (idActividad.HasValue)
-                        form = new FormRegistrarActividad(idActividad.Value); 
+                        form = new FormRegistrarActividad(idActividad.Value);
                     else
                     {
-                        form = new FormRegistrarActividad(); 
-                        form.SetNombreActividad(nombreMayus); 
+                        form = new FormRegistrarActividad();
+                        form.SetNombreActividad(nombreMayus);
                     }
                     form.ShowDialog();
+                },
+
+                // AUTOCOMPLETADO PARA ACTIVIDADES
+                ObtenerSugerencias = filtro =>
+                {
+                    if (string.IsNullOrWhiteSpace(filtro))
+                        return Enumerable.Empty<string>();
+
+                    try
+                    {
+                        using (var conn = new Conexion().Conectar())
+                        {
+                            var query = "SELECT nombre FROM actividad " +
+                                        "WHERE UPPER(nombre) LIKE @filtro " +
+                                        "ORDER BY nombre " +
+                                        "LIMIT 10";
+
+                            using (var cmd = new MySql.Data.MySqlClient.MySqlCommand(query, conn))
+                            {
+                                cmd.Parameters.AddWithValue("@filtro", $"%{filtro.ToUpper()}%");
+
+                                var sugerencias = new List<string>();
+                                using (var reader = cmd.ExecuteReader())
+                                {
+                                    while (reader.Read())
+                                    {
+                                        sugerencias.Add(reader["nombre"].ToString());
+                                    }
+                                }
+                                return sugerencias;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        return Enumerable.Empty<string>();
+                    }
                 }
+
             };
         }
     }
