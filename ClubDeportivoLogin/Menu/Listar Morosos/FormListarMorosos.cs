@@ -40,17 +40,17 @@ namespace ClubDeportivoLogin
     cu.fechaVencimiento AS Vencimiento
 FROM Cliente c
 INNER JOIN Socio s ON c.id = s.id
-INNER JOIN Cuota cu ON cu.idSocio = s.id
 INNER JOIN (
-    -- Subconsulta que obtiene la cuota con el máximo id por socio
+    -- Obtenemos la última cuota por socio (la de mayor ID)
     SELECT idSocio, MAX(id) AS maxIdCuota
     FROM Cuota
     GROUP BY idSocio
-) AS sub ON sub.idSocio = cu.idSocio AND sub.maxIdCuota = cu.id
+) AS ultCuota ON s.id = ultCuota.idSocio
+INNER JOIN Cuota cu ON cu.id = ultCuota.maxIdCuota
 WHERE s.fechaBaja IS NULL
-  AND cu.fechaPago IS NULL
   AND cu.fechaVencimiento < CURDATE()
 ORDER BY cu.fechaVencimiento ASC;
+
 ";
 
                 using MySqlCommand cmd = new MySqlCommand(query, conexion);
