@@ -31,7 +31,7 @@
             ConfigurarInterfaz();
             btnSiguiente.Click += btnSiguiente_Click;
             btnSalir.Click += btnSalir_Click;
-            
+
 
             // Configuración especial para ABM de Pagos
             if (config.UsarModoPagos)
@@ -78,6 +78,22 @@
         {
             listSugerencia.Visible = false;
 
+            listSugerencia.MouseDown += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    int index = listSugerencia.IndexFromPoint(e.Location);
+
+                    if (index != ListBox.NoMatches) 
+                    {
+                        listSugerencia.SelectedIndex = index;
+                        SeleccionarSugerencia();
+                    }
+                }
+            };
+
+            listSugerencia.KeyDown += ListSugerencia_KeyDown;
+
             listSugerencia.Leave += (s, e) => OcultarSugerencias();
 
             timerBusqueda = new System.Windows.Forms.Timer();
@@ -105,7 +121,7 @@
             }
 
             string texto = txtCampoID.Text.Trim();
-            if (texto.Length < 2) 
+            if (texto.Length < 2)
             {
                 OcultarSugerencias();
                 return;
@@ -125,12 +141,13 @@
 
         private void MostrarSugerencias()
         {
+            // Ajustar posición y tamaño
             listSugerencia.Location = new Point(
                 txtCampoID.Left,
                 txtCampoID.Bottom + 2
             );
             listSugerencia.Width = txtCampoID.Width;
-            listSugerencia.Height = 120; 
+            listSugerencia.Height = 120; // Altura fija o dinámica
 
             listSugerencia.DataSource = null;
             listSugerencia.DataSource = sugerenciasActuales;
@@ -141,6 +158,38 @@
         private void OcultarSugerencias()
         {
             listSugerencia.Visible = false;
+        }
+
+        private void SeleccionarSugerencia()
+        {
+            if (listSugerencia.SelectedItem != null)
+            {
+
+                txtCampoID.Text = listSugerencia.SelectedItem.ToString();
+
+                OcultarSugerencias();
+
+                txtCampoID.Focus();
+
+                txtCampoID.SelectAll();
+
+            }
+        }
+
+        private void ListSugerencia_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                SeleccionarSugerencia();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                OcultarSugerencias();
+                txtCampoID.Focus();
+                e.Handled = true;
+            }
+
         }
 
 
@@ -161,10 +210,12 @@
                 {
                     if (listSugerencia.SelectedItem != null)
                     {
+                        SeleccionarSugerencia();
                     }
                     else if (sugerenciasActuales.Count > 0)
                     {
                         listSugerencia.SelectedIndex = 0;
+                        SeleccionarSugerencia();
                     }
                     e.Handled = true;
                 }
