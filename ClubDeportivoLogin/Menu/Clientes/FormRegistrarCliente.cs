@@ -1101,55 +1101,37 @@ namespace ClubDeportivoLogin
         {
             public static string CalcularEstadoSocio(int idSocio, MySqlConnection conn)
             {
-                try
+                // 1. Verificar estado de baja
+                using (var cmdBaja = new MySqlCommand(
+                    "SELECT fechaBaja FROM Socio WHERE id = @id", conn))
                 {
-                    // Verificar si tiene fecha de baja (ex socio o baja programada)
-                    using (var cmd = new MySqlCommand("SELECT fechaBaja FROM Socio WHERE id=@id", conn))
+                    cmdBaja.Parameters.AddWithValue("@id", idSocio);
+                    var fechaBaja = cmdBaja.ExecuteScalar();
+
+                    if (fechaBaja != null && fechaBaja != DBNull.Value)
                     {
-                        cmd.Parameters.AddWithValue("@id", idSocio);
-                        var fechaBaja = cmd.ExecuteScalar();
-
-                        if (fechaBaja != null && fechaBaja != DBNull.Value)
-                        {
-                            DateTime fb = Convert.ToDateTime(fechaBaja);
-                            if (fb > DateTime.Today)
-                                return "BAJA PROGRAMADA";
-                            else
-                                return "EX SOCIO";
-                        }
-                    }
-
-                    // Buscar la última cuota pagada por el socio
-                    using (var cmd = new MySqlCommand(@"
-                SELECT fechaVencimiento 
-                FROM Cuota 
-                WHERE idSocio = @id AND fechaPago IS NOT NULL 
-                ORDER BY fechaVencimiento DESC 
-                LIMIT 1", conn))
-                    {
-                        cmd.Parameters.AddWithValue("@id", idSocio);
-                        object ultimaCuotaObj = cmd.ExecuteScalar();
-
-                        if (ultimaCuotaObj != null && ultimaCuotaObj != DBNull.Value)
-                        {
-                            DateTime ultimaFechaVenc = Convert.ToDateTime(ultimaCuotaObj);
-                            if (ultimaFechaVenc < DateTime.Today)
-                                return "SOCIO MOROSO";
-                            else
-                                return "SOCIO AL DIA";
-                        }
-                        else
-                        {
-                            // Si no tiene ninguna cuota pagada, se considera moroso
-                            return "SOCIO MOROSO";
-                        }
+                        DateTime fb = Convert.ToDateTime(fechaBaja);
+                        return fb > DateTime.Today ? "BAJA PROGRAMADA" : "EX SOCIO";
                     }
                 }
-                catch (Exception ex)
+
+                // 2. Verificar cuotas vencidas no pagadas
+                using (var cmdMoroso = new MySqlCommand(
+                    "SELECT COUNT(*) FROM Cuota " +
+                    "WHERE idSocio = @id " +
+                    "AND fechaVencimiento < CURDATE() " +   // Solo cuotas vencidas
+                    "AND fechaPago IS NULL",                // No pagadas
+                    conn))
                 {
-                    Console.WriteLine("Error en CalcularEstadoSocio: " + ex.Message);
-                    return "ERROR DE ESTADO";
+                    cmdMoroso.Parameters.AddWithValue("@id", idSocio);
+                    int cuotasVencidas = Convert.ToInt32(cmdMoroso.ExecuteScalar());
+
+                    if (cuotasVencidas > 0)
+                        return "SOCIO MOROSO";
                 }
+
+                // 3. Si no cumple condiciones anteriores
+                return "SOCIO AL DIA";
             }
         }
 
