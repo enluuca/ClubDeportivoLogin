@@ -598,64 +598,73 @@ namespace ClubDeportivoLogin
 
                 using (var conn = conexion.Conectar())
                 {
-                    // 1. Registrar la cuota pagada
-                    var cmd = new MySqlCommand(@"INSERT INTO Cuota 
-        (idSocio, fechaPago, monto, medioPago, cantidadCuotas, descuento, montoTotal, fechaVencimiento, comprobante)
-        VALUES (@idSocio, @fechaPago, @monto, @medioPago, @cuotas, @descuento, @montoTotal, @fechaVenc, @comprobante)", conn);
-
-                    cmd.Parameters.AddWithValue("@idSocio", idSocio);
-                    cmd.Parameters.AddWithValue("@fechaPago", dateFePagoS.Value);
-                    cmd.Parameters.AddWithValue("@monto", decimal.Parse(txtMontoS.Text));
-                    cmd.Parameters.AddWithValue("@medioPago", comboMedPagoS.SelectedItem.ToString());
-                    cmd.Parameters.AddWithValue("@cuotas", comboMedPagoS.SelectedItem.ToString() == "Credito" ? int.Parse(txtCuotasS.Text) : 1);
-                    cmd.Parameters.AddWithValue("@descuento", string.IsNullOrWhiteSpace(txtDescuentoS.Text) ? 0 : decimal.Parse(txtDescuentoS.Text));
-                    cmd.Parameters.AddWithValue("@montoTotal", montoTotal.Value);
-
-                    // Fecha de vencimiento: 1 mes después del pago
-                    DateTime nuevaFechaVencimiento = dateFePagoS.Value.AddMonths(1);
-                    cmd.Parameters.AddWithValue("@fechaVenc", nuevaFechaVencimiento);
-                    cmd.Parameters.AddWithValue("@comprobante", DBNull.Value);
-                    cmd.ExecuteNonQuery();
-
-                    // 2. Obtener ID de la cuota recién registrada
-                    cmd.CommandText = "SELECT LAST_INSERT_ID()";
-                    int idCuota = Convert.ToInt32(cmd.ExecuteScalar());
-
-                    // 3. Generar y actualizar el número de comprobante
-                    string comprobante = $"100{idCuota}";
-                    var cmdUpdate = new MySqlCommand("UPDATE Cuota SET comprobante = @comprobante WHERE id = @id", conn);
-                    cmdUpdate.Parameters.AddWithValue("@comprobante", comprobante);
-                    cmdUpdate.Parameters.AddWithValue("@id", idCuota);
-                    cmdUpdate.ExecuteNonQuery();
-                    ultimoIdPago = idCuota;
-
-                    // 4. Actualizar la fecha de vencimiento en la tabla Socio
-                    var cmdUpdateSocio = new MySqlCommand("UPDATE Socio SET fechaVencimientoCuota = @fechaVenc WHERE id = @id", conn);
-                    cmdUpdateSocio.Parameters.AddWithValue("@fechaVenc", nuevaFechaVencimiento);
-                    cmdUpdateSocio.Parameters.AddWithValue("@id", idSocio);
-                    cmdUpdateSocio.ExecuteNonQuery();
-
-                    // 5. Verificar si ya existe una cuota futura sin pagar para evitar duplicación
-                    var cmdCheck = new MySqlCommand(@"SELECT COUNT(*) FROM Cuota 
-        WHERE idSocio = @id AND fechaPago IS NULL AND fechaVencimiento = @fechaVenc", conn);
-                    cmdCheck.Parameters.AddWithValue("@id", idSocio);
-                    cmdCheck.Parameters.AddWithValue("@fechaVenc", nuevaFechaVencimiento);
-                    int cuotasPendientes = Convert.ToInt32(cmdCheck.ExecuteScalar());
-
-                    if (cuotasPendientes == 0)
+                    // OBTENER LA CUOTA PENDIENTE ACTUAL
+                    int idCuotaPendiente = 0;
+                    using (var cmdFind = new MySqlCommand(
+                        "SELECT id FROM Cuota WHERE idSocio = @idSocio AND fechaPago IS NULL ORDER BY fechaVencimiento ASC LIMIT 1",
+                        conn))
                     {
-                        // 6. Registrar próxima cuota pendiente si no existe
-                        var cmdProx = new MySqlCommand(@"INSERT INTO Cuota (idSocio, fechaVencimiento, monto) 
-            VALUES (@idSocio, @fechaVenc, @monto)", conn);
-
-                        cmdProx.Parameters.AddWithValue("@idSocio", idSocio);
-                        cmdProx.Parameters.AddWithValue("@fechaVenc", nuevaFechaVencimiento);
-                        cmdProx.Parameters.AddWithValue("@monto", decimal.Parse(txtMontoS.Text));
-                        cmdProx.ExecuteNonQuery();
+                        cmdFind.Parameters.AddWithValue("@idSocio", idSocio);
+                        var result = cmdFind.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            idCuotaPendiente = Convert.ToInt32(result);
+                        }
                     }
-                }
-                MessageBox.Show("Pago registrado correctamente. Se abrirá la vista previa del comprobante.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+                    if (idCuotaPendiente == 0)
+                    {
+                        MessageBox.Show("No se encontró cuota pendiente para pagar", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // ACTUALIZAR LA CUOTA EXISTENTE
+                    var cmdUpdate = new MySqlCommand(
+                        @"UPDATE Cuota SET 
+                        fechaPago = @fechaPago, 
+                        monto = @monto, 
+                        medioPago = @medioPago, 
+                        cantidadCuotas = @cuotas, 
+                        descuento = @descuento, 
+                        montoTotal = @montoTotal,
+                        comprobante = @comprobante
+                        WHERE id = @idCuota",
+                        conn);
+
+                    cmdUpdate.Parameters.AddWithValue("@fechaPago", dateFePagoS.Value);
+                    cmdUpdate.Parameters.AddWithValue("@monto", decimal.Parse(txtMontoS.Text));
+                    cmdUpdate.Parameters.AddWithValue("@medioPago", comboMedPagoS.SelectedItem.ToString());
+                    cmdUpdate.Parameters.AddWithValue("@cuotas", comboMedPagoS.SelectedItem.ToString() == "Credito" ? int.Parse(txtCuotasS.Text) : 1);
+                    cmdUpdate.Parameters.AddWithValue("@descuento", string.IsNullOrWhiteSpace(txtDescuentoS.Text) ? 0 : decimal.Parse(txtDescuentoS.Text));
+                    cmdUpdate.Parameters.AddWithValue("@montoTotal", montoTotal.Value);
+                    cmdUpdate.Parameters.AddWithValue("@comprobante", DBNull.Value); // Se actualizará abajo
+                    cmdUpdate.Parameters.AddWithValue("@idCuota", idCuotaPendiente);
+                    cmdUpdate.ExecuteNonQuery();
+
+                    // Generar comprobante
+                    string comprobante = $"100{idCuotaPendiente}";
+                    var cmdUpdateComprobante = new MySqlCommand(
+                        "UPDATE Cuota SET comprobante=@comprobante WHERE id=@id",
+                        conn);
+                    cmdUpdateComprobante.Parameters.AddWithValue("@comprobante", comprobante);
+                    cmdUpdateComprobante.Parameters.AddWithValue("@id", idCuotaPendiente);
+                    cmdUpdateComprobante.ExecuteNonQuery();
+                    ultimoIdPago = idCuotaPendiente;
+
+                    // CREAR NUEVA CUOTA PENDIENTE PARA EL PRÓXIMO MES
+                    var cmdProx = new MySqlCommand(
+                        @"INSERT INTO Cuota 
+                        (idSocio, fechaVencimiento, monto)
+                        VALUES (@idSocio, @fechaVenc, @monto)",
+                        conn);
+
+                    cmdProx.Parameters.AddWithValue("@idSocio", idSocio);
+                    cmdProx.Parameters.AddWithValue("@fechaVenc", dateFePagoS.Value.AddMonths(1));
+                    cmdProx.Parameters.AddWithValue("@monto", decimal.Parse(txtMontoS.Text));
+                    cmdProx.ExecuteNonQuery();
+                }
+
+                MessageBox.Show("Pago registrado correctamente. Se abrirá la vista previa del comprobante.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 btnImprimirS_Click(sender, e);
                 this.Close();
             }
