@@ -109,7 +109,7 @@
             tabPage1.Controls.Add(label1);
             tabPage1.Location = new Point(4, 28);
             tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3, 3, 3, 3);
+            tabPage1.Padding = new Padding(3);
             tabPage1.Size = new Size(583, 302);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Pago Socio";
@@ -148,7 +148,7 @@
             // 
             lblTotalDescuentoS.Font = new Font("Segoe UI Semibold", 11.1272726F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblTotalDescuentoS.ForeColor = Color.DarkGreen;
-            lblTotalDescuentoS.Location = new Point(223, 11);
+            lblTotalDescuentoS.Location = new Point(220, 6);
             lblTotalDescuentoS.Name = "lblTotalDescuentoS";
             lblTotalDescuentoS.Size = new Size(339, 29);
             lblTotalDescuentoS.TabIndex = 33;
@@ -160,9 +160,9 @@
             label13.Font = new Font("Segoe UI Semibold", 9.75F, FontStyle.Bold | FontStyle.Underline, GraphicsUnit.Point, 0);
             label13.Location = new Point(13, 11);
             label13.Name = "label13";
-            label13.Size = new Size(201, 20);
+            label13.Size = new Size(144, 20);
             label13.TabIndex = 32;
-            label13.Text = "DETALLE DEL PRIMER PAGO:";
+            label13.Text = "DETALLE DEL PAGO:";
             // 
             // txtCuotasS
             // 
@@ -339,7 +339,7 @@
             tabPage2.Controls.Add(label3);
             tabPage2.Location = new Point(4, 28);
             tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3, 3, 3, 3);
+            tabPage2.Padding = new Padding(3);
             tabPage2.Size = new Size(583, 302);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Pago No Socio";

@@ -480,19 +480,19 @@ namespace ClubDeportivoLogin
                 // Si se ingresó un descuento válido y no está en el rango 0–100, entonces es inválido
                 if (descuentoValido && (descuento < 0 || descuento > 100))
                 {
-                    lblTotalDescuentoNS.Text = "Descuento inválido";
+                    lblTotalDescuentoS.Text = "Descuento inválido";
                     return null;
                 }
 
                 if (!descuentoValido || descuento == 0)
                 {
-                    lblTotalDescuentoNS.Text = $"TOTAL A ABONAR: $ {monto:0.00}";
+                    lblTotalDescuentoS.Text = $"TOTAL A ABONAR: $ {monto:0.00}";
                     return monto;
                 }
                 else
                 {
                     decimal total = monto - (monto * (descuento / 100));
-                    lblTotalDescuentoNS.Text = $"TOTAL A ABONAR: $ {total:0.00}";
+                    lblTotalDescuentoS.Text = $"TOTAL A ABONAR: $ {total:0.00}";
                     return total;
                 }
             }
