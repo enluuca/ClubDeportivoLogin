@@ -134,6 +134,7 @@ namespace ClubDeportivoLogin
                                 lblDniS.Text = reader["dni"].ToString();
                                 txtMontoS.Text = reader["monto"].ToString();
                                 txtDescuentoS.Text = reader["descuento"].ToString();
+                                lblEstadoS.Text = Convert.ToDateTime(reader["fechaVencimiento"]).ToString("dd/MM/yyyy");
                                 comboMedPagoS.Items.Clear();
                                 comboMedPagoS.Items.AddRange(new string[] { "Efectivo", "Credito", "Debito" });
                                 comboMedPagoS.SelectedItem = reader["medioPago"].ToString();
@@ -144,6 +145,7 @@ namespace ClubDeportivoLogin
                                 txtDescuentoS.Enabled = false;
                                 comboMedPagoS.Enabled = false;
                                 dateFePagoS.Enabled = false;
+                                lblEstadoS.Enabled = false;
                                 btnImprimirS.Visible = true;
                                 btnImprimirS.Enabled = true;
                             }
@@ -158,6 +160,7 @@ namespace ClubDeportivoLogin
                 }
                 else if (centro == "200")
                 {
+                    CargarActividades();
                     using (var conn = conexion.Conectar())
                     using (var cmd = new MySqlCommand(
                         @"SELECT r.*, cli.nombre, cli.apellido, cli.dni, a.id AS idActividad, a.nombre AS nombreActividad, a.costo AS costoActividad
@@ -183,26 +186,19 @@ namespace ClubDeportivoLogin
                                 dateFePagoNS.Value = Convert.ToDateTime(reader["fechaPago"]);
                                 ultimoIdPago = Convert.ToInt32(reader["id"]);
                                 lblClienteNS.Text = $"{reader["nombre"]} {reader["apellido"]}";
-                                comboBox1.Text = reader["nombreActividad"].ToString();
                                 txtMontoNS.Enabled = false;
                                 txtDescuentoNS.Enabled = false;
                                 comboMedPagoNS.Enabled = false;
                                 dateFePagoNS.Enabled = false;
                                 btnImprimirNS.Visible = true;
                                 btnImprimirNS.Enabled = true;
-                                comboBox1.Enabled = false;
                                 btnAgregarActividad.Visible = false;
 
                                 // Seleccionar la actividad en el combo
                                 int idActividad = Convert.ToInt32(reader["idActividad"]);
-                                foreach (var item in comboBox1.Items)
-                                {
-                                    if (item is ActividadCombo act && act.Id == idActividad)
-                                    {
-                                        comboBox1.SelectedItem = act;
-                                        break;
-                                    }
-                                }
+                                comboBox1.SelectedItem = comboBox1.Items.Cast<ActividadCombo>().FirstOrDefault(a => a.Id == idActividad);
+                                comboBox1.Enabled = false;
+
                             }
                             else
                             {
@@ -381,11 +377,14 @@ namespace ClubDeportivoLogin
                 {
                     comboBox1.Items.Add(new ActividadCombo
                     {
-                        Id = Convert.ToInt32(reader["id"]),
-                        Nombre = reader["nombre"].ToString()
+                        Id = reader.GetInt32("id"),
+                        Nombre = reader.GetString("nombre")
                     });
                 }
             }
+            // Configuración para que funcione SelectedValue
+            comboBox1.DisplayMember = "Nombre";
+            comboBox1.ValueMember = "Id";
         }
 
         public class ActividadCombo
