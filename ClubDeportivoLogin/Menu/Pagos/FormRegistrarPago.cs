@@ -789,39 +789,70 @@ namespace ClubDeportivoLogin
         private void btnBorrar_Click(object sender, EventArgs e)
         {
             DateTime fechaPago = DateTime.MinValue;
+            int idSocio = 0;
+            DateTime fechaVencimientoOriginal = DateTime.MinValue;
+            decimal montoOriginal = 0;
 
-            // Obtener la fecha de pago del comprobante a eliminar
+            // Obtener información completa del comprobante
             using (var conn = conexion.Conectar())
             {
                 if (esConsulta)
                 {
-                    if (consultaCentro == "100")
+                    if (consultaCentro == "100") // Comprobante de Socio
                     {
-                        using (var cmd = new MySqlCommand("SELECT fechaPago FROM Cuota WHERE id = @id", conn))
+                        using (var cmd = new MySqlCommand(
+                            "SELECT fechaPago, idSocio, fechaVencimiento, monto " +
+                            "FROM Cuota WHERE id = @id",
+                            conn))
                         {
                             cmd.Parameters.AddWithValue("@id", ultimoIdPago);
-                            var result = cmd.ExecuteScalar();
-                            if (result != null && result != DBNull.Value)
-                                fechaPago = Convert.ToDateTime(result);
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    fechaPago = reader.GetDateTime("fechaPago");
+                                    idSocio = reader.GetInt32("idSocio");
+                                    fechaVencimientoOriginal = reader.GetDateTime("fechaVencimiento");
+                                    montoOriginal = reader.GetDecimal("monto");
+                                }
+                                else
+                                {
+                                    MessageBox.Show("No se encontró el comprobante especificado", "Error",
+                                                  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                            }
                         }
                     }
-                    else if (consultaCentro == "200")
+                    else if (consultaCentro == "200") // Comprobante de No Socio
                     {
-                        using (var cmd = new MySqlCommand("SELECT fechaPago FROM RegistroActividad WHERE id = @id", conn))
+                        using (var cmd = new MySqlCommand(
+                            "SELECT fechaPago FROM RegistroActividad WHERE id = @id",
+                            conn))
                         {
                             cmd.Parameters.AddWithValue("@id", ultimoIdPago);
                             var result = cmd.ExecuteScalar();
                             if (result != null && result != DBNull.Value)
+                            {
                                 fechaPago = Convert.ToDateTime(result);
+                            }
+                            else
+                            {
+                                MessageBox.Show("No se encontró el comprobante especificado", "Error",
+                                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
                         }
                     }
                 }
-                else
+                else // Modo no consulta (nuevos pagos)
                 {
+                    // Mantener lógica original para nuevos pagos
                     if (esSocio)
                     {
                         using (var cmd = new MySqlCommand(
-                            "SELECT fechaPago FROM Cuota WHERE idSocio = @idSocio AND fechaPago IS NOT NULL ORDER BY fechaPago DESC LIMIT 1", conn))
+                            "SELECT fechaPago FROM Cuota WHERE idSocio = @idSocio AND fechaPago IS NOT NULL ORDER BY fechaPago DESC LIMIT 1",
+                            conn))
                         {
                             cmd.Parameters.AddWithValue("@idSocio", idCliente);
                             var result = cmd.ExecuteScalar();
@@ -832,7 +863,8 @@ namespace ClubDeportivoLogin
                     else
                     {
                         using (var cmd = new MySqlCommand(
-                            "SELECT fechaPago FROM RegistroActividad WHERE idNoSocio = @idNoSocio ORDER BY fechaPago DESC LIMIT 1", conn))
+                            "SELECT fechaPago FROM RegistroActividad WHERE idNoSocio = @idNoSocio ORDER BY fechaPago DESC LIMIT 1",
+                            conn))
                         {
                             cmd.Parameters.AddWithValue("@idNoSocio", idCliente);
                             var result = cmd.ExecuteScalar();
@@ -843,20 +875,178 @@ namespace ClubDeportivoLogin
                 }
             }
 
-            // Validar antigüedad
+            // Validar antigüedad (máximo 30 días para reversión)
             if (fechaPago != DateTime.MinValue)
             {
                 int dias = (DateTime.Today - fechaPago.Date).Days;
                 if (dias >= 30)
                 {
                     MessageBox.Show(
-                        "El sistema no permite borrar comprobantes antiguos cuya fecha de pago es mayor o igual a 30 días.",
-                        "ADVERTENCIA",
+                        "No se pueden revertir pagos con más de 30 días de antigüedad",
+                        "Advertencia",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
                     return;
                 }
             }
+
+            // Manejo segun tipo de operación
+            if (esConsulta)
+            {
+                ProcesarBorradoConsulta(fechaPago, idSocio, fechaVencimientoOriginal, montoOriginal);
+            }
+            else
+            {
+                ProcesarBorradoNuevoPago();
+            }
+        }
+
+        private void ProcesarBorradoConsulta(DateTime fechaPago, int idSocio, DateTime fechaVencimientoOriginal, decimal montoOriginal)
+        {
+            if (consultaCentro == "100") // Revertir pago de socio
+            {
+                // Mensaje de confirmación específico para reversión
+                var confirm = MessageBox.Show(
+                    "¿Está seguro que desea REVERTIR este pago?\n\n" +
+                    "Esta acción realizará lo siguiente:\n" +
+                    "1. Eliminará la cuota pendiente actual\n" +
+                    "2. Restaurará la cuota original a estado pendiente\n",
+                    "Confirmar reversión",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (confirm == DialogResult.Yes)
+                {
+                    RevertirPagoSocioCompleto(idSocio, fechaVencimientoOriginal, montoOriginal);
+                }
+            }
+            else if (consultaCentro == "200") // Eliminar pago de no socio
+            {
+                var confirm = MessageBox.Show(
+                    "¿Está seguro que desea eliminar este comprobante?",
+                    "Confirmar eliminación",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (confirm == DialogResult.Yes)
+                {
+                    EliminarPagoNoSocio();
+                }
+            }
+        }
+
+        private void RevertirPagoSocioCompleto(int idSocio, DateTime fechaVencimientoOriginal, decimal montoOriginal)
+        {
+            using (var conn = conexion.Conectar())
+            using (var transaction = conn.BeginTransaction())
+            {
+                try
+                {
+                    // PASO 1: Elimino todas las cuotas pendientes actuales
+                    int cuotasActualesEliminadas = 0;
+                    using (var cmdEliminarActual = new MySqlCommand(
+                        "DELETE FROM Cuota " +
+                        "WHERE idSocio = @idSocio " +
+                        "AND fechaPago IS NULL",
+                        conn, transaction))
+                    {
+                        cmdEliminarActual.Parameters.AddWithValue("@idSocio", idSocio);
+                        cuotasActualesEliminadas = cmdEliminarActual.ExecuteNonQuery();
+                    }
+
+                    // PASO 2: Restauro la cuota original a estado pendiente
+                    using (var cmdRevertir = new MySqlCommand(
+                        @"UPDATE Cuota SET 
+                        fechaPago = NULL,
+                        medioPago = NULL,
+                        cantidadCuotas = NULL,
+                        descuento = NULL,
+                        montoTotal = NULL,
+                        comprobante = NULL,
+                        monto = @montoOriginal,
+                        fechaVencimiento = @fechaVencOriginal
+                        WHERE id = @id",
+                        conn, transaction))
+                    {
+                        cmdRevertir.Parameters.AddWithValue("@id", ultimoIdPago);
+                        cmdRevertir.Parameters.AddWithValue("@montoOriginal", montoOriginal);
+                        cmdRevertir.Parameters.AddWithValue("@fechaVencOriginal", fechaVencimientoOriginal);
+                        int registrosActualizados = cmdRevertir.ExecuteNonQuery();
+
+                        if (registrosActualizados == 0)
+                        {
+                            throw new Exception("No se pudo revertir el pago original");
+                        }
+                    }
+
+
+                    // Confirmar transacción
+                    transaction.Commit();
+
+                    // muestra resumen de operaciones
+                    string mensaje = "Pago revertido exitosamente. \n";
+                    mensaje += $"• Cuotas pendientes actuales eliminadas.\n";
+                    mensaje += $"• Cuota original restaurada a pendiente.\n";
+
+
+                    MessageBox.Show(mensaje, "Éxito",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    this.Close();
+                }
+                catch (Exception ex)
+                {
+                    // Revertir en caso de error
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        MessageBox.Show($"Error al revertir transacción: {rollbackEx.Message}", "Error Crítico",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    MessageBox.Show($"Error al revertir pago: {ex.Message}", "Error",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void EliminarPagoNoSocio()
+        {
+            try
+            {
+                using (var conn = conexion.Conectar())
+                using (var cmd = new MySqlCommand(
+                    "DELETE FROM RegistroActividad WHERE id = @id",
+                    conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", ultimoIdPago);
+                    int rows = cmd.ExecuteNonQuery();
+
+                    if (rows > 0)
+                    {
+                        MessageBox.Show("Comprobante de no socio eliminado correctamente", "Éxito",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("No se encontró el registro para eliminar", "Advertencia",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al eliminar pago: {ex.Message}", "Error",
+                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ProcesarBorradoNuevoPago()
+        {
             var confirm = MessageBox.Show(
                 "¿Está seguro que desea eliminar este comprobante? Esta acción no se puede revertir.",
                 "Confirmar eliminación",
@@ -865,66 +1055,6 @@ namespace ClubDeportivoLogin
 
             if (confirm != DialogResult.Yes)
                 return;
-
-            if (esConsulta)
-            {
-                using (var conn = conexion.Conectar())
-                {
-                    if (consultaCentro == "100")
-                    {
-                        var adv = MessageBox.Show(
-                            "Al eliminar este pago, la próxima cuota pendiente (si existe) también será eliminada. ¿Desea continuar?",
-                            "Advertencia para socios",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Warning);
-
-                        if (adv != DialogResult.Yes)
-                            return;
-
-                        var cmdDelProx = new MySqlCommand(
-                            @"DELETE FROM Cuota 
-                    WHERE idSocio = @idSocio 
-                    AND fechaPago IS NULL
-                    AND fechaVencimiento = (SELECT DATE_ADD(MAX(fechaPago), INTERVAL 1 MONTH) 
-                    FROM Cuota 
-                    WHERE idSocio = @idSocio)", conn);
-                        cmdDelProx.Parameters.AddWithValue("@idSocio", idCliente);
-                        int proxDeleted = cmdDelProx.ExecuteNonQuery();
-
-                        if (proxDeleted > 0)
-                        {
-                            MessageBox.Show($"Se eliminó {proxDeleted} cuota pendiente asociada",
-                                            "Advertencia",
-                                            MessageBoxButtons.OK,
-                                            MessageBoxIcon.Information);
-                        }
-
-                        // Eliminar el pago actual
-                        var cmdClean = new MySqlCommand(
-                            @"DELETE FROM Cuota 
-                            WHERE id = @id", conn);
-                        cmdClean.Parameters.AddWithValue("@id", ultimoIdPago);
-                        int rows = cmdClean.ExecuteNonQuery();
-
-                        if (rows > 0)
-                            MessageBox.Show("El pago fue eliminado correctamente.", "Borrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        else
-                            MessageBox.Show("No se encontró comprobante para borrar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                    else if (consultaCentro == "200")
-                    {
-                        var cmd = new MySqlCommand("DELETE FROM RegistroActividad WHERE id = @id", conn);
-                        cmd.Parameters.AddWithValue("@id", ultimoIdPago);
-                        int rows = cmd.ExecuteNonQuery();
-                        if (rows > 0)
-                            MessageBox.Show("Comprobante de no socio eliminado.", "Borrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        else
-                            MessageBox.Show("No se encontró comprobante para borrar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                }
-                this.Close();
-                return;
-            }
 
             if (esSocio)
             {
@@ -941,7 +1071,8 @@ namespace ClubDeportivoLogin
                 {
                     int idUltimaCuota = 0;
                     using (var cmdFind = new MySqlCommand(
-                        "SELECT id FROM Cuota WHERE idSocio = @idSocio AND fechaPago IS NOT NULL ORDER BY fechaPago DESC LIMIT 1", conn))
+                        "SELECT id FROM Cuota WHERE idSocio = @idSocio AND fechaPago IS NOT NULL ORDER BY fechaPago DESC LIMIT 1",
+                        conn))
                     {
                         cmdFind.Parameters.AddWithValue("@idSocio", idCliente);
                         var result = cmdFind.ExecuteScalar();
@@ -951,16 +1082,18 @@ namespace ClubDeportivoLogin
 
                     if (idUltimaCuota == 0)
                     {
-                        MessageBox.Show("No se encontró pago para borrar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show("No se encontró pago para borrar.", "Aviso",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
 
                     // Eliminar próxima cuota pendiente
                     var cmdDelProx = new MySqlCommand(
                         @"DELETE FROM Cuota 
-                        WHERE idSocio = @idSocio 
-                        AND fechaPago IS NULL 
-                        AND id > @id", conn);
+                WHERE idSocio = @idSocio 
+                AND fechaPago IS NULL 
+                AND id > @id",
+                        conn);
                     cmdDelProx.Parameters.AddWithValue("@idSocio", idCliente);
                     cmdDelProx.Parameters.AddWithValue("@id", idUltimaCuota);
                     cmdDelProx.ExecuteNonQuery();
@@ -968,32 +1101,50 @@ namespace ClubDeportivoLogin
                     // Eliminar el pago actual
                     var cmdClean = new MySqlCommand(
                         @"DELETE FROM Cuota 
-                WHERE id = @id", conn);
+                WHERE id = @id",
+                        conn);
                     cmdClean.Parameters.AddWithValue("@id", idUltimaCuota);
                     int rows = cmdClean.ExecuteNonQuery();
 
                     if (rows > 0)
-                        MessageBox.Show("El pago fue eliminado correctamente.", "Borrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    {
+                        MessageBox.Show("El pago fue eliminado correctamente.", "Éxito",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.Close();
+                    }
                     else
-                        MessageBox.Show("No se encontró pago para borrar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    {
+                        MessageBox.Show("No se encontró pago para borrar.", "Aviso",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
             else
             {
                 using (var conn = conexion.Conectar())
                 using (var cmd = new MySqlCommand(
-                    "DELETE FROM RegistroActividad WHERE id = (SELECT id FROM (SELECT id FROM RegistroActividad WHERE idNoSocio = @idNoSocio ORDER BY fechaPago DESC LIMIT 1) AS t)", conn))
+                    "DELETE FROM RegistroActividad WHERE id = (SELECT id FROM (SELECT id FROM RegistroActividad WHERE idNoSocio = @idNoSocio ORDER BY fechaPago DESC LIMIT 1) AS t)",
+                    conn))
                 {
                     cmd.Parameters.AddWithValue("@idNoSocio", idCliente);
                     int rows = cmd.ExecuteNonQuery();
+
                     if (rows > 0)
-                        MessageBox.Show("Último pago de no socio eliminado.", "Borrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    {
+                        MessageBox.Show("Último pago de no socio eliminado.", "Éxito",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.Close();
+                    }
                     else
-                        MessageBox.Show("No se encontró pago para borrar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    {
+                        MessageBox.Show("No se encontró pago para borrar.", "Aviso",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
-            this.Close();
         }
+
+        
 
         private void btnImprimirS_Click(object sender, EventArgs e)
         {
