@@ -130,6 +130,7 @@
             btnBorrar.TabIndex = 4;
             btnBorrar.Text = "BORRAR";
             btnBorrar.UseVisualStyleBackColor = true;
+            btnBorrar.Visible = false;
             btnBorrar.Click += btnBorrar_Click;
             // 
             // FormRegistrarActividad

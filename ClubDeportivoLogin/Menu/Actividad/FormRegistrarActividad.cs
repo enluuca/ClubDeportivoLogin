@@ -51,7 +51,8 @@ namespace ClubDeportivoLogin
                         txtActividad.ReadOnly = true; 
                         txtActividad.ForeColor = Color.Black; 
                         lblEstado.Text = "EDITAR ACTIVIDAD";
-                        lblEstado.ForeColor = Color.Red; 
+                        lblEstado.ForeColor = Color.Red;
+                        btnBorrar.Visible = true;
                     }
                     else
                     {
@@ -63,7 +64,8 @@ namespace ClubDeportivoLogin
                         txtActividad.ForeColor = Color.Black; 
                         txtCosto.Text = "";
                         lblEstado.Text = "REGISTRAR NUEVA ACTIVIDAD";
-                        lblEstado.ForeColor = Color.Blue; 
+                        lblEstado.ForeColor = Color.Blue;
+                        btnBorrar.Visible = false;
                     }
                 }
             }
@@ -86,6 +88,7 @@ namespace ClubDeportivoLogin
                         actividadExistente = true;
                         lblEstado.Text = "EDITAR ACTIVIDAD";
                         lblEstado.ForeColor = Color.Red;
+                        btnBorrar.Visible = true;
                     }
                 }
             }
