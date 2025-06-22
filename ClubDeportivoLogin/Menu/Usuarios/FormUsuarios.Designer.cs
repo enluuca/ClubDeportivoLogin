@@ -82,6 +82,7 @@
             // 
             // comboRol
             // 
+            comboRol.DropDownStyle = ComboBoxStyle.DropDownList;
             comboRol.FormattingEnabled = true;
             comboRol.Location = new Point(140, 93);
             comboRol.Name = "comboRol";

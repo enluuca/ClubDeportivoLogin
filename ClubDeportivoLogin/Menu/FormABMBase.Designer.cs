@@ -144,6 +144,7 @@
             // 
             // cmbModo
             // 
+            cmbModo.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbModo.Font = new Font("Segoe UI Semibold", 9.163636F, FontStyle.Bold, GraphicsUnit.Point, 0);
             cmbModo.FormattingEnabled = true;
             cmbModo.Location = new Point(463, 67);
